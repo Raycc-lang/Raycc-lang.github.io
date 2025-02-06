@@ -21,13 +21,11 @@ categories: jekyll update
 
     - ARM架构：SoC（System on chip）芯片内置BootROM，执行初始化后从存储设备固定位置加载引导程序
 
-2. 引导加载阶段:
-   - Bootloader是加载系统的工具。它为硬件提供了一个抽象层，支持对复杂文件系统的操作，并且传递参数给内核。
-   - 常见引导程序：
-        * x86：GRUB
-        * ARM：U-Boot（嵌入式设备主流选择）
-        * Windows：bootmgfw.efi（UEFI环境）
-3. 内核加载阶段，
+2. 引导加载阶段。加载系统的工具叫做Bootloader（引导程序）。它为硬件提供了一个抽象层，支持对复杂文件系统的操作，并且传递参数给内核。常见引导程序：
+    * x86：GRUB
+    * ARM：U-Boot（嵌入式设备主流选择）
+    * Windows：bootmgfw.efi（UEFI环境）
+1. 内核加载阶段。
 这里存在一个"先有鸡还是先有蛋"的哲学问题：操作系统需要管理存储设备，但自身又存放在存储设备中。解决方案是：
    - Bootloader直接加载包含基础驱动和文件系统模块的内核
    - 通过initramfs（初始内存文件系统）建立临时根文件系统，最终挂载真正的根文件系统(rootfs)
@@ -85,29 +83,33 @@ categories: jekyll update
 
 
 请注意就像Bootloader不太够直接拉起系统一样，SoC ROM只能读取比较简单的程序，而U-boot相对于SoC显得像庞然大物，所以中间也有很多过度阶段。
-这就是两步加载，甚至有三步加载。但是我们不用管这些细节，好消息是我们编译的U-boot二进制程序里面包括第二步和第三步加载，
+这就是两步加载，甚至有三步加载。好消息是我们不用管这些，U-boot二进制程序里面包括第二步和第三步加载，
 我们挂载SD卡，直接把整个二进制文件刷到从64个扇区起的位置就可以了。
 ```sudo dd if=u-boot-rockchip.bin of=/dev/sdX seek=64```
-然后分区，刷文件系统，然后根据[ArchlinuxARM](https://archlinuxarm.org/platforms/armv8/rockchip/rock64)的指引下载和解压用户空间的文件。
+如果不行的，就需要分别制作TPL/SPL，Uboot和Trust的镜像，然后分别刷到第64，16384，24576扇区了。
+然后分区，刷文件系统，然后根据[ArchlinuxARM](https://archlinuxarm.org/platforms/armv8/rockchip/rock64)的指引下载和解压Rootfs文件。
 
 ```bash 
+    # 为了简单，只分一个区
+    parted /dev/sdX makpart '' ext4 32768s -1s
+    mount /dev/sdXp1 /mnt
     wget http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz
-    bsdtar -xpf ArchLinuxARM-aarch64-latest.tar.gz -C #挂载地址 
+    bsdtar -xpf ArchLinuxARM-aarch64-latest.tar.gz -C /mnt
 ```
 接下来，wiki上我们下载一个Boot.scr的脚本，放在/boot文件下面。这个文件是连接U-boot 和Linux操作系统的关键步骤。
 我们编译的U-boot里面有个配置参数CONFIG_DISTRO_DEFAULTS，如果这个允许参数，Uboot会扫描可启动的磁盘里面的boot.scr或者更通用的extlinux.conf文件。然后执行这些文件。
 一个extlinux.conf 文件看起来是这样：
 
 ``` extlinux.conf
-    label Arch with uart devicetree overlay
-        kernel /arch/Image.gz
-        initrd /arch/initramfs-linux.img
-        fdt /dtbs/arch/board.dtb
-        fdtoverlays /dtbs/arch/overlay/uart0-gpio0-1.dtbo
-        append console=ttyS0,115200 console=tty1 rw root=UUID=fc0d0284-ca84-4194-bf8a-4b9da8d66908
+label Arch with uart devicetree overlay
+    kernel /arch/Image.gz
+    initrd /arch/initramfs-linux.img
+    fdt /dtbs/arch/board.dtb
+    fdtoverlays /dtbs/arch/overlay/uart0-gpio0-1.dtbo
+    append console=ttyS0,115200 console=tty1 rw root=UUID=fc0d0284-ca84-4194-bf8a-4b9da8d66908
 ```
-这个配置文件告诉U-boot内核的位置，我们上文提到的Initrd镜像的位置，FDT是关于设备的信息数据的二进制文件DTB的位置，然后则是需要传递给内核的参数。
-再看一下boot.scr脚本。需要注意的是boot.scr是一个二进制文件，我们不能直接打开，我们应该看对应的cmd结尾的文件。但是因为他们传递数据是基于文本，直接打开也能看出里面在干什么。
+这个配置文件告诉U-boot内核的位置，Initrd镜像的位置，FDT是关于设备的信息数据的二进制文件DTB的位置，然后是需要传递给内核的参数。
+再看一下boot.scr脚本。需要注意的是boot.scr是一个二进制文件，我们不能直接打开，我们应该看对应的cmd文件。但是因为他们传递数据是基于文本，直接打开也能看出里面在干什么。
 脚本里面内容比较多，我们不展示全文，只展示关键的部分。
 
 ```boot.scr
@@ -131,14 +133,14 @@ categories: jekyll update
 ```
 能不能直接下载Arch项目给的boot.scr文件？答案是不行，至少在我这里行不通。
 Arch提供的initramfs镜像不能直接加载，需要编译成U-boot可以加载的形式。
-dtb文件也需要修改成合适的，反正Arch提供的dtb文件在我这里没有一个能用的。
-还是需要自己编译内核和设备树。
+dtb文件也需要修改成合适的，反正Arch提供的dtb文件在我这里没有一个能用的,需要自己编译内核和dtbs。
 不用担心，只要知道这个文件的作用，我们完全可以自己写这个脚本。
 
 写完之后，安装Uboot-tools包，然后制作ramdisk和boot.scr:
 
-``` mkimage -A arm -O linux -T ramdisk -C none -n "Initrd Image" -d uInitrd.img /boot/initramfs-linux.img;
-    mkimage -A arm -O linux -T script -C none -n "Boot Script" -d boot.cmd boot.scr
+``` 
+    mkimage -A arm -O linux -T ramdisk -C none -n "Initrd Image" -d /mnt/boot/initramfs-linux.img /mnt/boot/uInitrd.img;
+    mkimage -A arm -O linux -T script -C none -n "Boot Script" -d boot.cmd /mnt/boot/boot.scr
 ```
 想了解这个命令可以上网查询，这里就不详细讲了。
 到了这一步就基本完成了，然后插电看看是不是已经好了。
