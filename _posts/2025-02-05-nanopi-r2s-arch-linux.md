@@ -1,69 +1,89 @@
 ---
 layout: post
-title:  "Nanopi R2s 安装Arch Linux"
+title:  "Nanopi-R2s 刷arch linux的经历"
 date:   2025-02-04 14:29:22 +0800
 categories: jekyll update
 ---
 
-# Nanopi-R2s 刷arch linux的经历
-
-## 我想装Arch Linux
+### 我想装Arch Linux
 最近我给自己的Nanopi-R2s上安装了Arch Linux。
-如果用R2s做软路由，用OpenWRT官方固件是非常好的选择。硬件提商也提供Ubuntu和Debian镜像。但是我偏爱Arch，因为它难。
-安装Arch的过程很繁琐，没有一键工具，不过Arch提供非常全面和详细的文档。有挑战，但是也有很好的支持，这是最好的学习环境。
-我从过去安装Arch Linux的过程中学到了很多东西。这次想把这个经验移植到ARM系统上。
-网上虽然有一些教程，但是大多数只是提供安装步骤，如果不理解每个步骤的意义，出了问题就会很难处理。
-我不打算也写一篇这样的教程，而是会对比x86系统，聊一下ARM系统的启动过程。
-这篇文章是写给还没有刷Arch之前的自己，对于想到了解一点计算机启动过程的朋友也会有意义。
+如果用R2s做软路由，用OpenWRT官方固件就很好。厂商也提供了Ubuntu/Debian镜像。但是我偏爱Arch，因为对于没有相关知识的人来说很难。
+安装Arch的过程很繁琐，没有一键工具，不过Arch提供非常全面和详细的文档。虽然过程具有挑战性，但它也提供了很好的支持，这是最佳的学习环境。
+我从过去安装Arch Linux的过程中学到了很多东西。这次也想在我几年前买的Nanopi R2s上面试一试。
+网上虽然有一些教程，但是大多数都是提供操作步骤，如果不理解每个步骤的意义，出了问题就会很难处理。
+我不打算也写一篇这样的教程，而是会对比PC架构，聊一下ARM系统的启动过程。
+这篇文章是写给还没有刷Arch之前的自己，也适合那些想了解计算机启动过程的朋友。
 
-## ARM 设备的启动流程
-首先了解计算机的启动过程，看它需要哪些组件，我们再逐一准备。
-计算机启动的过程很复杂，但是为了便于理解我们把它简化成三个步骤:
-1. BIOS(Bacia Input Output System). 这个是提前刷在主板上的，加电以后CPU会首先读取它，进行硬件初始化，POST（加电自检），然后寻找可启动设备。
-Arm架构上没有BIOS,相对应的是SoC(System on Chip).
-2. BIOS启动Bootloader。Bootloader是加载系统的工具。它为硬件提供了一个抽象层，支持对复杂文件系统的操作，并且传递参数给内核。
-配合Linux系统常见的bootloader是Grub. ARM上用是U-boot。
-bootmgfw.efi是 Windows 的 EFI 应用程序，负责加载内核（winload.efi）并处理启动配置（如恢复环境、多版本选择）。
-3. 最后由Bootloader拉起系统。这个步骤不想想象中那么简单。
-我们知道所有的计算机硬件包括磁盘和内存都是由操作系统管理的，但是操作系统本身也保存在文件系统之中，也需要加载到内存中。
-所以在操作系统管理计算机之前就需要有一个操作系统了。比较简单的情况下Bootloader可以直接加载内核，内核里面已经包含了对文件系统的操作。
-但是更多的情况下我们还需要一个中间步骤Initrd（Initial RAM Disk）或现代更常用的initramfs（Initial RAM Filesystem）。
+### ARM 设备的启动流程
+要成功部署系统，首先要理解设备从通电到系统就绪的全过程。我们将其简化为三个阶段：。
+1. 固件初始化阶段： 
+    - 传统PC：BIOS（Basic Input Output System）完成硬件初始化、POST自检、启动设备选择
 
-知道了这个启动过程，然后我们就知道自己要准备什么：
-1. 首先我们得有一个硬件，硬件包括了计算单元，SoC ROM。有的内置了eMMC(闪存)，没有的话得准备SD卡。我的是Nanopi-R2s。
-2. 准备U-boot, 我们自己编译一个。有ARM64的Linux系统最好，没有的话安装一个交叉编译器。我用WSL配置的交叉编译环境。
-3. 准备操作系统，包括内核和用户空间的基本配置。这个直接从官方下载。
-4. 前面总结了三个步骤，但是这些步骤都比较简单，可以可以自己编译，也可以直接网上下载。
-接下来，如何把每个环节连接起来，让它们成为一个可运行的整体是最重要的，这也是本文的意义所在。
+    - ARM架构：SoC（System on chip）芯片内置BootROM，执行初始化后从存储设备固定位置加载引导程序
 
-## 实践
-编译U-boot和内核可以直接看NanoPi R2S 
-[wiki](https://wiki.friendlyelec.com/wiki/index.php/NanoPi_R2S/zh#.E5.A6.82.E4.BD.95.E7.BC.96.E8.AF.91.E7.B3.BB.E7.BB.9F)
-我推荐从上有[U-boot项目](https://docs.u-boot.org/en/latest/build/gcc.html)编译，简单直接。项目开发比较活跃。
+2. 引导加载阶段:
+   - Bootloader是加载系统的工具。它为硬件提供了一个抽象层，支持对复杂文件系统的操作，并且传递参数给内核。
+   - 常见引导程序：
+        * x86：GRUB
+        * ARM：U-Boot（嵌入式设备主流选择）
+        * Windows：bootmgfw.efi（UEFI环境）
+3. 内核加载阶段，
+这里存在一个"先有鸡还是先有蛋"的哲学问题：操作系统需要管理存储设备，但自身又存放在存储设备中。解决方案是：
+   - Bootloader直接加载包含基础驱动和文件系统模块的内核
+   - 通过initramfs（初始内存文件系统）建立临时根文件系统，最终挂载真正的根文件系统(rootfs)
+
+基于上述原理，我们需要准备以下组件：
+
+|组件	|作用	|获取方式
+|------|------|-----
+|U-Boot |	二级引导程序 |	交叉编译或预编译二进制
+|Linux内核	| 系统核心	| 官方仓库或自定义编译
+|设备树(Device Tree)	|硬件描述文件	|厂商SDK提供
+|initramfs	| 临时根文件系统 | Arch Linux ARM官方镜像
+|rootfs	|根文件系统	|Arch Linux ARM官方镜像
+
+
+### 实战部署流程
+参考[FriendlyElec Wiki](https://wiki.friendlyelec.com/wiki/index.php/NanoPi_R2S/zh#.E5.A6.82.E4.BD.95.E7.BC.96.E8.AF.91.E7.B3.BB.E7.BB.9F)配置交叉编译环境：
+```bash
+    # 安装友善提供的交叉编译器
+    sudo bash -c \
+  "$(curl -fsSL http://112.124.9.243:3000/friendlyelec/build-env-on-ubuntu-bionic/raw/branch/cn/install.sh)"
+    #配置环境
+    export PATH=/opt/FriendlyARM/toolchain/11.3-aarch64/bin:$PATH
+    export GCC_COLORS=auto
+```
+
+我推荐从上游U-boot项目编译，而不是wiki上面uboot-rockchip。更简单直接，项目开发比较活跃。
+```bash
+    # 编译 ARM64 Rockchip SoC镜像
+    git clone --depth 1 https://github.com/TrustedFirmware-A/trusted-firmware-a.git
+    cd trusted-firmware-a
+    make realclean
+    make CROSS_COMPILE=aarch64-linux-gnu- PLAT=rk3328
+    cd ..
+    # 编译Uboot
+    git clone --depth 1 https://source.denx.de/u-boot/u-boot.git
+    cd u-boot
+    export BL31=../trusted-firmware-a/build/rk3328/release/bl31/bl31.elf
+    make evb-rk3328_defconfig
+    make CROSS_COMPILE=aarch64-linux-gnu-
+```
 编译好之后把它刷入eMMC或者sc卡的固定位置。因为SoC ROM不向BIOS有充足的空间，所以它的连接方式比较简单粗暴，就是从存储设备的固定位置读取。
 微星瑞芯片遵循它自己的[分区标准](https://opensource.rock-chips.com/wiki_Partitions)。
-+--------+----------------+----------+-------------+---------+
-| Boot   | Terminology #1 | Actual   | Rockchip    | Image   |
-| stage  |                | program  |  Image      | Location|
-| number |                | name     |   Name      | (sector)|
-+--------+----------------+----------+-------------+---------+
-| 1      |  Primary       | ROM code | BootRom     |         |
-|        |  Program       |          |             |         |
-|        |  Loader        |          |             |         |
-|        |                |          |             |         |
-| 2      |  Secondary     | U-Boot   |idbloader.img| 0x40    | pre-loader
-|        |  Program       | TPL/SPL  |             |         |
-|        |  Loader (SPL)  |          |             |         |
-|        |                |          |             |         |
-| 3      |  -             | U-Boot   | u-boot.itb  | 0x4000  | including u-boot and atf
-|        |                |          | uboot.img   |         | only used with miniloader
-|        |                |          |             |         |
-|        |                | ATF/TEE  | trust.img   | 0x6000  | only used with miniloader
-|        |                |          |             |         |
-| 4      |  -             | kernel   | boot.img    | 0x8000  |
-|        |                |          |             |         |
-| 5      |  -             | rootfs   | rootfs.img  | 0x40000 |
-+--------+----------------+----------+-------------+---------+
+
+| 阶段 |  名称      | 程序    | 文件    | 磁盘位置   
+| ---  | -------  | -------  | -------      | ------- 
+| 1      |  主引导   | ROM code | BootRom     |         
+| 2      |  二级引导    | U-Boot   |  boot-rockchip.bin  | 0x40    
+|        |                  | TPL/SPL  |             |         
+| 3     |  boot分区 | Linux内核   | boot.img    | 0x8000  
+|       |        |  Initrd镜像    |   initramfs-linux.img         
+|       |        |  设备树二进制文件  |   rk3328-nanopi-r2s.dtb           
+|       |        |       |      boot.scr       |         
+| 4   |   root文件系统   |          |             |   0x40000   
+
+
 请注意就像Bootloader不太够直接拉起系统一样，SoC ROM只能读取比较简单的程序，而U-boot相对于SoC显得像庞然大物，所以中间也有很多过度阶段。
 这就是两步加载，甚至有三步加载。但是我们不用管这些细节，好消息是我们编译的U-boot二进制程序里面包括第二步和第三步加载，
 我们挂载SD卡，直接把整个二进制文件刷到从64个扇区起的位置就可以了。
@@ -74,7 +94,7 @@ bootmgfw.efi是 Windows 的 EFI 应用程序，负责加载内核（winload.efi�
     wget http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz
     bsdtar -xpf ArchLinuxARM-aarch64-latest.tar.gz -C #挂载地址 
 ```
-然后最关键的步骤来了，wiki上我们下载一个Boot.scr的脚本，放在/boot文件下面。这个文件是连接U-boot 和Linux操作系统的关键步骤。
+接下来，wiki上我们下载一个Boot.scr的脚本，放在/boot文件下面。这个文件是连接U-boot 和Linux操作系统的关键步骤。
 我们编译的U-boot里面有个配置参数CONFIG_DISTRO_DEFAULTS，如果这个允许参数，Uboot会扫描可启动的磁盘里面的boot.scr或者更通用的extlinux.conf文件。然后执行这些文件。
 一个extlinux.conf 文件看起来是这样：
 
@@ -109,21 +129,23 @@ bootmgfw.efi是 Windows 的 EFI 应用程序，负责加载内核（winload.efi�
 	"fdtoverlay_addr_r=0x01f00000\0"	\
 	"kernel_addr_r=0x02080000\0"	\
 ```
-说这么多有什么用吗，直接下载Arch项目给的boot.scr文件不行吗，答案是不行，至少在我这里行不通。
-不用担心，我们作为高级用户，只要知道这个文件的作用，我们自己写这个脚本。
-毕竟我们自己很清楚自己把这些文件放在哪个位置了，如需要传递哪些内核参数。
-最坑的是，Arch提供的initramfs镜像不能直接加载，需要编译成U-boot可以加载的形式。
-然后scr文件也需要编译，U-boot无法识别文本文件。
-安装Uboot-tools包，然后
+能不能直接下载Arch项目给的boot.scr文件？答案是不行，至少在我这里行不通。
+Arch提供的initramfs镜像不能直接加载，需要编译成U-boot可以加载的形式。
+dtb文件也需要修改成合适的，反正Arch提供的dtb文件在我这里没有一个能用的。
+还是需要自己编译内核和设备树。
+不用担心，只要知道这个文件的作用，我们完全可以自己写这个脚本。
+
+写完之后，安装Uboot-tools包，然后制作ramdisk和boot.scr:
 
 ``` mkimage -A arm -O linux -T ramdisk -C none -n "Initrd Image" -d uInitrd.img /boot/initramfs-linux.img;
     mkimage -A arm -O linux -T script -C none -n "Boot Script" -d boot.cmd boot.scr
 ```
 想了解这个命令可以上网查询，这里就不详细讲了。
 到了这一步就基本完成了，然后插电看看是不是已经好了。
-我自己是没有显示器，如果指示灯不显示好了，我也不知道问题出在那个环节，浪费了很多时间。
-现在想来最好从Armbian这个项目下载一个能用的Ubuntu, 刷入自己编译的U-boot看能不能拉起Armbian, 
-试试自己写的boot.scr或者extlinux.conf能不能工作，最后再刷入Arch的文件系统了。
+
+### 必坑指南
+通过USB-TTL模块查看启动日志。我没有这个模块，如果指示灯不显示好了，我也不知道问题出在那个环节，浪费了很多时间。
+现在想来最好从Armbian这个项目下载一个能用的Ubuntu, 测试Uboot和boot.scr或者extlinux.conf能不能工作，最后再刷入Arch的文件系统了。
 不建议使用友善官方镜像，因为它们分区太细了，需要debug的环节就太多了。
-而且最好能准备两个sd卡，一边看好没好，一边重新配置。
+而且最好能准备两个sd卡，一个用于测试，一个用于正式部署。
 
