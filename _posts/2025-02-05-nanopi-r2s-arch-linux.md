@@ -1,3 +1,10 @@
+---
+layout: post
+title:  "Nanopi R2s 安装Arch Linux"
+date:   2025-02-04 14:29:22 +0800
+categories: jekyll update
+---
+
 # Nanopi-R2s 刷arch linux的经历
 
 ## 我想装Arch Linux
