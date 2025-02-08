@@ -67,7 +67,7 @@ categories: jekyll update
     make evb-rk3328_defconfig
     make CROSS_COMPILE=aarch64-linux-gnu-
 ```
-编译好之后把它刷入sc卡。因为SoC ROM不向BIOS有充足的空间，所以它的连接方式比较简单粗暴，就是从存储设备的固定位置读取。
+编译好之后把它刷入SD卡。因为SoC ROM不想BIOS有充足的空间，所以它的连接方式比较简单粗暴，就是从存储设备的固定位置读取。
 微星瑞芯片遵循它自己的[分区标准](https://opensource.rock-chips.com/wiki_Partitions)。
 
 | 阶段 |  名称      | 程序    | 文件    | 磁盘位置   
@@ -82,12 +82,12 @@ categories: jekyll update
 | 4   |   root文件系统   |          |             |   0x40000   
 
 
-请注意就像Bootloader不太够直接拉起系统一样，SoC ROM只能读取比较简单的程序，而U-boot相对于SoC显得像庞然大物，所以中间也有很多过度阶段。
-这就是两步加载，甚至有三步加载。好消息是我们不用管这些，U-boot二进制程序里面包括第二步和第三步加载，直接把整个二进制文件刷到从64个扇区起的位置就可以了。
+请注意就像Bootloader不太够直接拉起系统，因此使用Initrd建立临时根文件系统一样，SoC ROM只能读取比较简单的程序，而U-boot相对于SoC显得像庞然大物，所以中间也有很多过度阶段。
+这就是两步加载，甚至有三步加载(TPL/SPL)。好消息是我们不用管这些，U-boot二进制程序里面包括第二步和第三步加载，直接把整个二进制文件刷到从64个扇区起的位置就可以了。
 
 ```dd if=u-boot-rockchip.bin of=/dev/sdX seek=64 conv=notrunc```
 
-如果不行的，就需要分别制作TPL/SPL，Uboot和Trust的镜像，然后分别刷到第64，16384，24576扇区了,参考Uboot[文档](https://docs.u-boot.org/en/latest/board/rockchip/rockchip.html#package-the-image-with-rockchip-miniloader)。 
+如果不行的话，就需要分别制作TPL/SPL，Uboot和Trust的镜像，然后分别刷到第64，16384，24576扇区了,参考Uboot[文档](https://docs.u-boot.org/en/latest/board/rockchip/rockchip.html#package-the-image-with-rockchip-miniloader)。 
 
 然后分区、刷文件系统，然后根据[ArchlinuxARM](https://archlinuxarm.org/platforms/armv8/rockchip/rock64)的指引下载和解压Rootfs文件。
 
@@ -162,12 +162,12 @@ booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}
 通过USB-TTL模块查看启动日志。我没有这个模块，如果指示灯不显示好了，我也不知道问题出在那个环节，浪费了很多时间。
 现在想来最好从Armbian这个项目下载一个能用的系统, 测试Uboot和boot.scr或者extlinux.conf能不能工作，最后再刷入Arch的文件系统了。
 不建议使用友善官方镜像，因为它们分区太细了，需要debug的环节就太多了。
-而且最好能准备两个sd卡，一个用于测试，一个用于正式部署。
+而且最好能准备两个SD卡，一个用于测试，一个用于正式部署。
 
 
 参考链接：
-><https://wiki.friendlyelec.com/wiki/index.php/NanoPi_R2S/zh> 
-><https://opensource.rock-chips.com/wiki_Boot_option> 
-><https://docs.u-boot.org/en/latest/board/rockchip/rockchip.html#rockchip-boards> 
-><https://archlinuxarm.org/platforms/armv8/rockchip/rock64> 
-><https://gist.github.com/larsch/a8f13faa2163984bb945d02efb897e6d>
+ > <https://wiki.friendlyelec.com/wiki/index.php/NanoPi_R2S/zh> 
+ > <https://opensource.rock-chips.com/wiki_Boot_option> 
+ > <https://docs.u-boot.org/en/latest/board/rockchip/rockchip.html#rockchip-boards> 
+ > <https://archlinuxarm.org/platforms/armv8/rockchip/rock64> 
+ > <https://gist.github.com/larsch/a8f13faa2163984bb945d02efb897e6d>
