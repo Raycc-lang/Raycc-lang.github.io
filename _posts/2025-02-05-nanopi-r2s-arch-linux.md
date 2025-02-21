@@ -7,10 +7,14 @@ categories: jekyll update
 
 ### 我想装Arch Linux
 最近我给自己的Nanopi-R2s上安装了Arch Linux。
-如果用R2s做软路由，用OpenWRT官方固件就很好。厂商也提供了Ubuntu/Debian镜像。虽然使用这些镜像可以更快速部署，但我更想借这个机会深入理解Linux启动过程——这正是Arch的价值，它强制用户直面底层配置。尽管这对新手而言充满挑战，不过Arch提供非常全面和详细的文档。过程具有挑战性，但也提供了很好的支持，这是最佳的学习环境。
+
+如果用R2s做软路由，用OpenWRT官方固件就很好。厂商也提供了Ubuntu/Debian镜像。
+
+虽然使用这些镜像可以更快速部署，但我更想借这个机会深入理解Linux底层架构——这正是Arch的价值，它强制用户直面底层配置。尽管这对新手而言充满挑战，不过Arch提供非常全面和详细的文档。过程具有挑战性，但也提供了很好的支持，这是最佳的学习环境。
+
 我对在PC上安装Arch的过程很熟悉，但是在Arm设备上还是第一次。  
 网上虽然有一些教程，但是大多数都是提供操作步骤，如果不理解每个步骤的意义，出了问题就会很难处理。
-我不打算也写一篇这样的教程，而是会对比PC架构，聊一下ARM系统的启动过程。
+我不打算也写一篇这样的教程，而是会对比PC架构，聊一下ARM的启动过程。
 这篇文章是写给还没有刷Arch之前的自己，也适合那些想了解计算机启动过程的朋友。
 
 ### ARM 设备的启动流程
@@ -67,6 +71,7 @@ categories: jekyll update
     make CROSS_COMPILE=aarch64-linux-gnu-
 ```
 编译好之后把它刷入SD卡。因为SoC ROM不像BIOS有充足的空间，所以它的连接方式比较简单粗暴，就是从存储设备的固定位置读取。
+
 微星瑞芯片遵循它自己的[分区标准](https://opensource.rock-chips.com/wiki_Partitions)。
 
 | 阶段 |  名称      | 程序    | 文件    | 磁盘位置   
@@ -82,7 +87,7 @@ categories: jekyll update
 
 
 请注意就像Bootloader不太够直接拉起系统，因此使用Initrd建立临时根文件系统一样，SoC ROM只能读取比较简单的程序，而U-boot相对于SoC显得像庞然大物，所以中间也有很多过度阶段。
-这就是两步加载，甚至有三步加载(TPL/SPL)。好消息是我们不用管这些，U-boot二进制程序里面包括第二步和第三步加载，直接把整个二进制文件刷到从64个扇区起的位置就可以了。
+这个过程被称为两步加载，甚至有三步加载(先拉起TPL/SPL，再由他们拉起更大的启动程序)。好消息是我们不用管这些，U-boot二进制程序里面包括第二步和第三步加载，直接把整个二进制文件刷到从64个扇区起的位置就可以了。
 
 ```dd if=u-boot-rockchip.bin of=/dev/sdX seek=64 conv=notrunc```
 
@@ -110,7 +115,8 @@ label Arch with uart devicetree overlay
     fdtoverlays /dtbs/arch/overlay/uart0-gpio0-1.dtbo
     append console=ttyS0,115200 console=tty1 rw root=UUID=fc0d0284-ca84-4194-bf8a-4b9da8d66908
 ```
-这个配置文件告诉U-boot内核的位置，Initrd镜像的位置，FDT是关于设备的信息数据的二进制文件DTB的位置，然后是需要传递给内核的参数。
+这个配置文件告诉U-boot内核的位置，Initrd镜像的位置，和FDT文件的位置。FDT是关于设备的信息数据的二进制文件。然后是需要传递给内核的参数。
+
 再看一下boot.scr脚本。需要注意的是boot.scr是一个二进制文件，我们不能直接打开，我们应该看对应的cmd文件。但是因为他们传递数据是基于文本，直接打开也能看出里面在干什么。
 脚本里面内容比较多，我们不展示全文，只展示关键的部分。
 
@@ -122,7 +128,8 @@ label Arch with uart devicetree overlay
     booti ${kernel_addr_r} ${ramdisk_addr_r}:${filesize} ${fdt_addr_r};
 ```
 可见这个文件里面就是一堆U-boot命令，而且作用和上面的extlinux.conf文件是一样的，即传递一些内核参数，加载内核，设备树二进制文件，以及Initrd镜像到内存的指定位置，最后启动内核和Initrd。
-这些内存的位置则可以在源文件主板的Header文件中找到，比如rk3328_common.h里面的：
+
+这些内存位置的变量则在源文件主板的Header文件中，比如rk3328_common.h里面的：
 ```
     #define ENV_MEM_LAYOUT_SETTINGS		\
 	"scriptaddr=0x00500000\0"	\
@@ -133,9 +140,10 @@ label Arch with uart devicetree overlay
 	"fdtoverlay_addr_r=0x01f00000\0"	\
 	"kernel_addr_r=0x02080000\0"	\
 ```
-能不能直接下载Arch项目给的boot.scr文件？答案是不行，至少在我这里行不通。
-Arch提供的initramfs镜像不能直接加载，需要编译成U-boot可以加载的形式。
-dtb文件也需要修改成合适的，反正Arch提供的dtb文件在我这里没有一个能用的,需要自己编译内核和dtbs。
+我们下载的这个boot.scr脚本没办法直接使用，反正我这里行不通，至少存在以下几个问题：
+1. Arch提供的initramfs镜像不能直接加载，需要编译成U-boot可以加载的形式。
+2. dtb文件也需要修改成合适的，反正Arch提供的dtb文件在我这里没有一个能用的,需要自己编译内核和dtbs。
+   
 不用担心，只要知道这个文件的作用，我们完全可以自己写这个脚本。
 我的boot.cmd脚本差不都是这样：
 ```
@@ -154,19 +162,22 @@ booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}
     mkimage -A arm -O linux -T ramdisk -C none -n "Initrd Image" -d /mnt/boot/initramfs-linux.img /mnt/boot/uInitrd;
     mkimage -A arm -O linux -T script -C none -n "Boot Script" -d boot.cmd /mnt/boot/boot.scr
 ```
-想了解这个命令可以上网查询，这里就不详细讲了。
-到了这一步就基本完成了，然后插电看看是不是已经好了。
+想了解这个命令可以上网查询，这里就不详细介绍了。
+到了这一步就基本完成了，然后插电看看是不是已经搞定了。
 
 ### 必坑指南
 通过USB-TTL模块查看启动日志。我没有这个模块，如果指示灯不显示好了，我也不知道问题出在那个环节，浪费了很多时间。
+
 现在想来最好从Armbian这个项目下载一个能用的系统, 测试Uboot和boot.scr或者extlinux.conf能不能工作，最后再刷入Arch的文件系统了。
+
 不建议使用友善官方镜像，因为它们分区太细了，需要debug的环节就太多了。
-而且最好能准备两个SD卡，一个用于测试，一个用于正式部署。
+
+最好能准备两个SD卡，一个用于测试，一个用于正式部署。
 
 
 参考链接：
- > <https://wiki.friendlyelec.com/wiki/index.php/NanoPi_R2S/zh> 
- > <https://opensource.rock-chips.com/wiki_Boot_option> 
- > <https://docs.u-boot.org/en/latest/board/rockchip/rockchip.html#rockchip-boards> 
- > <https://archlinuxarm.org/platforms/armv8/rockchip/rock64> 
- > <https://gist.github.com/larsch/a8f13faa2163984bb945d02efb897e6d>
+ > <https://wiki.friendlyelec.com/wiki/index.php/NanoPi_R2S/zh>  
+ > <https://opensource.rock-chips.com/wiki_Boot_option>  
+ > <https://docs.u-boot.org/en/latest/board/rockchip/rockchip.html#rockchip-boards>  
+ > <https://archlinuxarm.org/platforms/armv8/rockchip/rock64>  
+ > <https://gist.github.com/larsch/a8f13faa2163984bb945d02efb897e6d>  
