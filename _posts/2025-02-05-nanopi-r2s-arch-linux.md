@@ -1,15 +1,14 @@
 ---
 layout: post
-title:  "Nanopi-R2s 刷arch linux的经历"
+title:  "电脑如何启动"
 date:   2025-02-04 14:29:22 +0800
 categories: jekyll update
 ---
 
 ### 我想装Arch Linux
 最近我给自己的Nanopi-R2s上安装了Arch Linux。
-如果用R2s做软路由，用OpenWRT官方固件就很好。厂商也提供了Ubuntu/Debian镜像。但是我偏爱Arch，因为对于没有相关知识的人来说很难。
-安装Arch的过程很繁琐，没有一键工具，不过Arch提供非常全面和详细的文档。虽然过程具有挑战性，但它也提供了很好的支持，这是最佳的学习环境。
-我从过去安装Arch Linux的过程中收益颇多。这次也想在我几年前买的Nanopi R2s上面试一试。  
+如果用R2s做软路由，用OpenWRT官方固件就很好。厂商也提供了Ubuntu/Debian镜像。虽然使用这些镜像可以更快速部署，但我更想借这个机会深入理解Linux启动过程——这正是Arch的价值，它强制用户直面底层配置。尽管这对新手而言充满挑战，不过Arch提供非常全面和详细的文档。过程具有挑战性，但也提供了很好的支持，这是最佳的学习环境。
+我对在PC上安装Arch的过程很熟悉，但是在Arm设备上还是第一次。  
 网上虽然有一些教程，但是大多数都是提供操作步骤，如果不理解每个步骤的意义，出了问题就会很难处理。
 我不打算也写一篇这样的教程，而是会对比PC架构，聊一下ARM系统的启动过程。
 这篇文章是写给还没有刷Arch之前的自己，也适合那些想了解计算机启动过程的朋友。
@@ -67,7 +66,7 @@ categories: jekyll update
     make evb-rk3328_defconfig
     make CROSS_COMPILE=aarch64-linux-gnu-
 ```
-编译好之后把它刷入SD卡。因为SoC ROM不想BIOS有充足的空间，所以它的连接方式比较简单粗暴，就是从存储设备的固定位置读取。
+编译好之后把它刷入SD卡。因为SoC ROM不像BIOS有充足的空间，所以它的连接方式比较简单粗暴，就是从存储设备的固定位置读取。
 微星瑞芯片遵循它自己的[分区标准](https://opensource.rock-chips.com/wiki_Partitions)。
 
 | 阶段 |  名称      | 程序    | 文件    | 磁盘位置   
