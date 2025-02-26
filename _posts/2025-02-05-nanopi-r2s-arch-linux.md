@@ -57,7 +57,7 @@ categories: jekyll update
     export GCC_COLORS=auto
 ```
 
-我推荐从上游U-boot项目编译，而不是wiki上面uboot-rockchip。更简单直接，项目开发比较活跃。
+首先编译UBoot。我推荐从上游U-boot项目编译，而不是wiki上面uboot-rockchip，更简单直接，项目开发比较活跃。
 ```bash
     # 编译 ARM64 Rockchip SoC镜像
     git clone --depth 1 https://github.com/TrustedFirmware-A/trusted-firmware-a.git
@@ -100,8 +100,11 @@ categories: jekyll update
 ```bash 
     # 为了简单，只分一个区
     parted /dev/sdX makpart '' ext4 32768s -1s
+    # 选择ext4文件系统
     mkfs.ext4 /dev/sdXp1
+    # 挂载分区
     mount /dev/sdXp1 /mnt
+    # 下载和解压 Arch Rootfs
     wget http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz
     bsdtar -xpf ArchLinuxARM-aarch64-latest.tar.gz -C /mnt
 ```
@@ -165,7 +168,7 @@ booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}
     mkimage -A arm -O linux -T script -C none -n "Boot Script" -d boot.cmd /mnt/boot/boot.scr
 ```
 想了解这个命令可以上网查询，这里就不详细介绍了。
-到了这一步就基本完成了，然后插电看看是不是已经搞定了。
+到了这一步我们有了U-boot作为启动加载程序，就基本完成了，然后插电看看是不是已经搞定了。
 
 ### 必坑指南
 通过USB-TTL模块查看启动日志。我没有这个模块，如果指示灯不显示好了，我也不知道问题出在那个环节，浪费了很多时间。
