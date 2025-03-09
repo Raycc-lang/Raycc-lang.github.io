@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "如何给ARM设备安装ArchLinux?"
+title:  "计算器的启动流程以及如何给R2s安装ArchLinux"
 date:   2025-02-04 14:29:22 +0800
 categories: jekyll update
 ---

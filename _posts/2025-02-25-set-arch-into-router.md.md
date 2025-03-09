@@ -1,13 +1,13 @@
 ---
 layout: post
-title:  "如何设置Archlinux作为软路由?"
+title:  "什么是路由器如何设置Archlinux作为软路由?"
 date:   2025-02-25 00:13:22 +0800
 categories: jekyll update
 ---
 
 ### 前言
 
-在前一篇博文中，我写了自己在NanopiR2s上安装ArchLinuxArm的经历，现在是时候用它做一些事儿了。
+在[前一篇博文](https://raycc.org/jekyll/update/2025/02/04/nanopi-r2s-arch-linux.html)中，我写了自己在NanopiR2s上安装ArchLinuxArm的经历，现在是时候用它做一些事儿了。
 
 R2S非常适合做家庭软路由，所以我的目标是用把ArchLinux设置成路由器，当然最重要的是通过这个经历了解一些网络知识。
 
@@ -141,7 +141,7 @@ table inet nat {
 
 不过这样配置的问题是需要静态地址 ，或者提前在DHCP服务器上指定该接口的IP地址，然而我在上面的章节中只指定了面向局域网的接口的IP地址。这就是Masquerading派上用场的地方了，它在本质上和上面SNAT方法是一样的，唯一的区别是IP地址由内核自动指定。
 
-到这里相信你已经理解了Masquerading这个技术。如果你看过我之前关于透明代理的博客，相信你会觉得熟悉。其实我们甚至可以用透明代理服务来代替Masquerading。
+到这里相信你已经理解了Masquerading这个技术。如果你看过我之前关于透明代理的[博客](https://raycc.org/jekyll/update/2024/07/27/TProxy.html)，相信你会觉得熟悉。有趣的是我们甚至可以用透明代理服务来代替Masquerading。
 
 ### 后续工作
 
