@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "什么是路由器如何设置Archlinux作为软路由?"
+title:  "什么是路由器？如何设置Archlinux作为软路由?"
 date:   2025-02-25 00:13:22 +0800
 categories: jekyll update
 ---

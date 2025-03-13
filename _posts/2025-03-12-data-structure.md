@@ -1,6 +1,6 @@
 ---
 layout: 
-title:  "什么是数据结构以及几个简单的数据结构的实现"
+title:  "什么是数据结构？"
 date:   
 categories: 
 ---
