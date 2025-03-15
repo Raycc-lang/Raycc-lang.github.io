@@ -21,7 +21,7 @@
 title: Ray's Blog
 # email: your-email@example.com
 description: >- # this means to ignore newlines until "baseurl:"
-  
+  'A self-learning journel.'
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://raycc-lang.github.io/" # the base hostname & protocol for your site, e.g. http://example.com
 # twitter_username: jekyllrb
@@ -31,6 +31,9 @@ url: "https://raycc-lang.github.io/" # the base hostname & protocol for your sit
 theme: minima
 plugins:
   - jekyll-feed
+
+
+show_downloads: true
 
 # Exclude from processing.
 # The following items will not be processed, by default.

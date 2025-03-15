@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: default
 title:  "计算机如何启动？如何部署Arch Linux Arm?"
 date:   2025-02-04 14:29:22 +0800
 categories: jekyll update
