@@ -1,10 +1,17 @@
-
+---
+layout: default
+title:  "什么是数据结构? 如何实现一个最基本的数据结构"
+date:   2025-03-15 00:13:22 +0800
+categories: jekyll update
+---
 
 ### 前言
 
-在上一篇博文中，我写到了自己对程序的认识，我讲到程序中肯定包括了数据和对数据的操作。内容主要来自HTDP这本书第一章前三节。这本书之后的内容有很大一部分都讲了不同的情况下应该如何组织数据，如何处理这些数据。我们用术语数据结构来表示这种数据在计算机中的组织方式。
+在上一篇博文中，我写到了自己对程序的认识，我讲到程序中肯定包括了数据和对数据的操作。因此如何在计算机中组织数据便是程序编写者的重要功课。我们用术语数据结构来表示这种数据在计算机中的组织方式。
 
-本博文我会继续这本书的旅程，首先还是会用自己的话进一步解释数据结构的含义。然后用Python实现Pair, 单向链表和查找表格等简单的数据结构。
+上一篇博文的内容主要来自HTDP这本书的第一章，而这本书后面的内容有很大一部分是关于数据结构的。
+
+本博文我会继续这本书的旅程，首先还是会用自己的话进一步解释数据结构。然后用Python实现Pair, 单向链表和查找表格等简单的数据结构。
 
 ### 什么是数据结构
 
@@ -27,18 +34,54 @@
 
 对于pair这个数据结构，在python中我们会直接使用tuplue来处理，因为内置的数据类型处理数据更快。不过为了学习和探索的目的我们还是要自己实现一遍。它可能并不实用，因为我会使用函数式编程的逻辑，对于不熟悉的朋友来说可能代码会看起来很奇怪，但是能帮助我们理解这些结构。
 
-实现这些结构的方法有很多，可以是纯函数，可以是对象，也可以是字典。我们分别来看看。
-
-首先用函数的方式来实现：
+实现这些结构的方法有很多，首先用函数的方式来实现：
 ```python
-# 首先是构造函数，给任意两个数据，我们保存这两个数据，也就是保留对它的操作
-def build_pair(a, b):
-    reture lambda f: f(a, b)
+    # 首先是构造函数，给任意两个数据，我们保存这两个数据，也就是保留对它们的操作
+    def create_pair(a, b):
+        return lambda f: f(a, b)
 
-# 然后是具体操作，我们需要一个函数来去除需要的数据
-def get_first():
-    reture lambda a, b: a
+    # 然后是具体操作，我们需要一个函数取出需要的数据
+    def get_first(self):
+        return lambda a, b: a
 
-def get_second():
-    reture lambda a, b: b
+    def get_second(self):
+        return lambda a, b: b
+
+    # 还需要一种方法来判断任何一个结构的数据是否是一个Pair
+    def is_pair(pair):
+        try:
+            pair(lambda a, b: None)
+            return True
+        except TypeError:
+            return False
 ```
+
+
+```python
+    # 一个对象就是一种新的数据类型，也包括了构造这种对象的方法
+    class Pair:
+        def __init__(self, a, b):
+            """
+            Initialize a Pair object with two elements.
+        def is_pair(self):
+           
+            Parameters:
+            a -- the first element of the pair
+            b -- the second element of the pair
+            """
+            self.a = a
+            self.b = b
+
+        # 获取两个数据中其中一个的方法也叫Getter
+        def get_first(self):
+            return self.a
+
+        def get_second(self):
+            return self.b
+
+        # 用对象实现这种结构的话，判断一个实例是不是这个对象或者继承这个对象的实例即可。
+        def is_pair(self):
+            return isinstance(self, Pair)
+
+```
+(未完待续)
