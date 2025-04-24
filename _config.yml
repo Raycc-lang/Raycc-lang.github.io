@@ -21,7 +21,7 @@
 title: "Ray's Blog"
 github:
   owner_name: "Ray"
-  owner_url: "raycc.org"
+  repository_url: "raycc.org"
 email: ray@raycc.org
 description: >- # this means to ignore newlines until "baseurl:"
 
