@@ -3,6 +3,7 @@ layout: default
 title:  "什么是数据结构? 如何实现一个最基本的数据结构"
 date:   2025-03-15 00:13:22 +0800
 categories: jekyll update
+rating: 0
 ---
 
 ### 前言
@@ -10,7 +11,7 @@ categories: jekyll update
 在上一篇博文中，我写到了自己对程序的认识，讲到一个程序中一定会有数据和对数据的操作这两个部分。因此如何在计算机中组织数据便是程序编写人员的重要功课。我们用“数据结构”这个术语来表示这种数据在计算机中的组织方式。
 
 上一篇博文的内容主要来自HTDP这本书的第一章，而这本书后面的内容有很大一部分是关于数据结构的。
-本博文我会继续这本书的旅程，也参考了作者的一些其他的书，包括《A Data-Centric Introduction to Computing》和《The Litte Scheme》。首先还是会用自己的话进一步解释数据结构。然后用Python实现Pair, 单向链表和查找表格等简单的数据结构。
+本博文我会继续这本书的旅程，也参考了作者的一些其他的书，包括《A Data-Centric Introduction to Computing》、《SICP》和《Concrete Abstructions》。首先还是会用自己的话进一步解释数据结构。然后用Python实现Pair, 单向链表和查找表格等简单的数据结构。
 
 ### 什么是数据结构
 
