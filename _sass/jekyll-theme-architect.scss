@@ -345,6 +345,37 @@ footer a:hover {
 * html .clearfix {height: 1%;}
 .clearfix {display: block;}
 
+/* Make series h2 bigger and bolder, and adjust h3 for subposts to be smaller */
+#main-content h2.series-title {
+  font-size: 1.35em;
+  font-weight: bold;
+  color: #2879d0;
+  margin-bottom: 0.2em;
+}
+#main-content h3,
+#main-content h3.subpost-title {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #474747;
+  margin: 0.2em 0 0.2em 0;
+  text-indent: 0;
+}
+/* Make meta and rating for series and posts visually consistent */
+.series-meta, .post-meta {
+  font-size: 0.95em;
+  color: #888;
+  margin-bottom: 0.7em;
+  display: inline-block;
+}
+.series-rating, .post-rating {
+  font-size: 0.95em;
+  color: #888;
+  margin-right: 0.5em;
+}
+.series-rating-stars, .post-rating-stars {
+  vertical-align: middle;
+}
+
 /* #Media Queries
 ================================================== */
 
