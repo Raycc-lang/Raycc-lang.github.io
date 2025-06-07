@@ -117,7 +117,7 @@ def l2_loss(xs: Iterable[float], ys: Iterable[float], theta: List[float]) -> flo
 
 ```
 
-我们的目标是找到一个θ，使得整个数据集上所有数据点的L2损失之和最小。也就是说我们需要套用损失函数，求出误差值作为参考不断迭代θ。在这个过程中l2_loss函数是我们优化的目标，也把它被称为**目标函数（objective function）**。
+我们的目标是找到一个θ，使得整个数据集上所有数据点的L2损失之和最小。也就是说我们需要套用损失函数，求出误差值作为参考不断迭代θ。在这个过程中l2_loss函数是我们优化的目标，也把它被称为**目标函数（objective function）**，有时候会用英文字母$J$表示。
 
 我们不希望在每次更新θ时都重复传入整个数据集；而且这个函数的内部调用了line函数，这意味着当前的l2_loss函数与line模型强耦合。我们更希望构建一个通用的损失函数，能够适配不同的模型。这两个问题可以通过把该函数改写成高阶函数来解决——我们把Line函数, xs, ys作为外层函数的参数，将模型函数和目标数据固定下来（这种方式称为闭包），生成一个只依赖于θ的损失函数：
 ```python
@@ -129,7 +129,8 @@ def l2_loss(target: Callable[[Iterable[float]], Callable[[float, float], List[fl
         def objective(theta: list[float]) -> float:
             
             pred_ys = target(xs)(*theta)
-            return sum(sqr(minus(pred_ys, ys))) 
+            errors = [yt - yp for yt, yp in zip(ys, pred_ys)]
+            return sum(sqr(errors)) 
         return objective
     return expectant
 ```
