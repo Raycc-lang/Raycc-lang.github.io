@@ -66,29 +66,26 @@ def nabla(objective_func: Callable[[List[float]], float],
           theta: List[float], 
           delta: float = 1e-6) -> List[float]:
     
-    gradients = []
     current_loss = objective_func(theta)
+    
+    def get_grad(theta: List[float], i: int) -> float:
 
-    for i in range(len(theta)):
-        
-        perturbed_theta = theta.copy()
-        # 操作副本，避免副作用
-        perturbed_theta[i] += delta
-        perturbed_loss = objective_func(theta)
-        gradient_component = (perturbed_loss - current_loss) / delta
-        gradients.append(gradient_component)
+        theta[i] += delta
+        new_loss = objective_func(theta)
+        return (new_loss - current_loss) / delta
 
+    gradients = [get_grad(theta.copy(), i) for i in range(len(theta))]
     return gradients
 ```
-这个函数看起来复杂了一些，但是其实只是遍历每一个参数，求出梯度并保存在列表而已。有了计算梯度的方法，接下来我们利用梯度信息来更新参数。
+这个函数看起来复杂了一些，但是其实先把计算导数的逻辑抽象出来，然后用列表推导式遍历参数而已。有了计算梯度的方法，接下来我们利用梯度信息来更新参数。
 
 #### 学习率：优化步伐的调节器
 
-"梯度包含两个关键信息：
+梯度包含两个关键信息：
 
 1. 方向（符号）：负梯度指示目标函数下降方向
 
-2. 强度（绝对值）：值越大表示优化空间越大"
+2. 强度（绝对值）：值越大表示优化空间越大
 
 但是具体做出多大的调整（确定具体步长）依然是一个问题。
 
@@ -110,7 +107,7 @@ print(line_objective(new_theta))
 这个参数的出来的损失高达$113,763.027$！这就像从山坡上跳向谷底，结果飞过了整个山谷，并且冲上了天空。
 
 
-为了解决这个问题，我们用一个小常数(通常0.001-0.1)乘以梯度，来控制更新步伐。 这个小的常数叫做**学习率(Learning Rate)**，用希腊字母$\alpha$表示。
+为了解决这个问题，我们用一个小常数(通常$0.001-0.1$)乘以梯度，来控制更新步伐。 这个小的常数叫做**学习率(Learning Rate)**，用希腊字母$\alpha$表示。
 
 下面的例子中会让学习率等于0.01。引入变化率会使每次参数的更新量很小，但是确保了损失在稳步下降。
 
@@ -132,14 +129,17 @@ learning_rate = 0.01
 
 def update_v1(theta: List[float]) -> List[float]:
   
+    # 求导
     grad = nabla(line_objective, theta)
+    # 根据导数g和学习率learning_rate更新参数
+    # 这里假设了p和g都是数值，可以直接应用乘法和减法
     return [p - learning_rate * g for p, g in zip(theta, grad)]
 
 ```
 测试一下这个更新函数好不好用：
 ```python
 
-last_theta = revise(update_with_loss(update_v1), 1000, initial_theta)
+theta_history = revise(update_with_loss(update_v1), 1000, initial_theta)
 ```
 得到的结果是[1.0499806157842302, 6.016510481423397e-05]这跟我们之前预测非常接近，画图来看几乎看不出区别。
 从目标函数值的变化率也可以看出来，损失在逐渐接近0。
@@ -155,17 +155,19 @@ def gradient_descent(objective_func: Callable[[List[float]], float],
                      initial_theta: List[float],
                      learning_rate: float,
                      num_revisions: int) -> List[float]:
-   
+
+    # 与update_v1相同
     def update(theta: List[float]) -> List[float]:
         
         grad = nabla(objective_func, theta)
+        
         revised_theta = [p - learning_rate * g for p, g in zip(theta, grad)]
         return revised_theta
 
     return revise(update, num_revisions, initial_theta)
 
 ```
-该函数内部是经过了两次再版的update函数，它是根据梯度下降这个接口函数的参数生成的。然后又调用`revise`函数来更新参数。
+首先复制之前的update_v1……不过它在gradient_descent函数内部，这意味这它是一个闭包结构：它访问函数内部的目标函数，而不是全局作用域的。最后调用`revise`函数来更新参数。
 
 为验证梯度下降的泛化能力，我们尝试二次函数拟合任务。
 
@@ -194,12 +196,12 @@ optimized_quad_theta = gradient_descent(
     initial_theta=initial_quad_theta,
     learning_rate=0.001,  
     num_revisions=1000   
-)
+)[-1]
 
 print(f"二次函数参数: a={optimized_quad_theta[0]:.4f}, b={optimized_quad_theta[1]:.4f}, c={optimized_quad_theta[2]:.4f}")
 ```
 输出示例：
-二次函数参数: `二次函数参数: a=1.4730, b=1.0132, c=2.0440`
+二次函数参数: `二次函数参数: a=1.4787, b=0.9929, c=2.0546`
 可是化数据和训练结果：
 ![二次函数训练结果](/assets/images/quadratic.png)
 
@@ -240,9 +242,11 @@ optimized_plane_theta = gradient_descent(
 )
 # TypeError: 'float' object is not iterable
 ```
-运行后出现类型错误。原因在于：当前`nabla`函数假设参数是平展列表(flat list)，但高维模型中的参数可能是嵌套结构（如权重向量和偏置标量组合）。这暴露了当前实现的维度局限性。
+运行后出现类型错误。原因在于：当前`nabla`和`update`函数都假设参数是平展列表(flat list)，也就是列表的元素都是浮点数，但高维模型中的参数可能是嵌套结构（比如这里每一个输入和每一个权重也是一个数组结构）。这暴露了当前实现的维度局限性。
 
-修改nabla和subt函数能让测试通过，可以自行尝试，但是这里不给出代码，因为下一篇文章我们会用一种更优雅的方式解决这个问题。
+修改nabla和update函数能让测试通过，可以自行尝试。要想比较优雅地解决这个问题，还需要先学习一个概念，我们下一篇文章处理。
+
+有趣的是，书中这个测试也通过了。原因是书中更早的时候就介绍了更复杂和数据结构以及操作；而且并没有给出nabla函数——也就是数值微分——的实现方案，想尝试书中代码的时候也只需要调用库函数。这么设计的原因是想专注于理解神经网络的相关概念。对微积分比较了解的朋友可以想一想怎么用链式法则来完成自动求导。
 
 #### 总结
 在本文中，我们深入探索了梯度下降算法。其核心在于：  
@@ -252,7 +256,7 @@ optimized_plane_theta = gradient_descent(
 
 通用性验证：成功应用于线性、二次函数的拟合。
 
-恭喜，读完本文你已经了解了整个训练线性模型/学习参数的过程。不过当前实现是梯度下降的基础版本，后续将探索更多变体和优化方案。况且你还不知道这跟神经网络甚至深度学习到底有什么关系。
+恭喜，读完本文你已经了解了整个训练线性模型/学习参数的过程。不过当前实现是梯度下降的基础版本，后续将探索更多变体和优化方案。况且你可能还不知道这跟神经网络或者深度学习到底有什么关系。
 
 当前急需解决的问题是基于列表实现的函数无法处理高维数组。虽然可以暂时修改函数的实现逻辑来临时解决问题，但是更好的办法是寻找一个通用的解决方案，而这正是下一篇文章的主题。我们将会从一个非常酷的概念——**张量（tensor）**入手，到彻底解决所有高维数组操作问题。
 
