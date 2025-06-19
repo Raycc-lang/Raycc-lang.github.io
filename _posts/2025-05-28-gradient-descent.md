@@ -47,17 +47,17 @@ $$
 # 函数名叫做nabla，因为del是python里的关键字
 
 def nabla_single(objective_func: Callable[[List[float]], float],
-          p: float,
+          theta: float,
           delta: float = 1e-6) -> float:
 
     current_loss = objective_func(theta)
-    perturbed_theta = p + delta
+    theta[0] = theta[0] + delta
     perturbed_loss = objective_func(perturbed_theta)
     gradient = (perturbed_loss - current_loss) / delta
     return gradient
 
 ```
-参数delta参数代表微增量，是一个非常小的数值，也可以自定义，比如使用上面的0.0099。
+参数delta参数代表微增量，这个方法通过微小的参数扰动近似导数，类似于斜率公式 $(y2-y1)/(x2-x1)$。但 delta 太大会不精确，太小可能因浮点误差失真，通常取 1e-6。这种求导数的方法被称为数值微分。
 
 不过这个函数只能处理单个参数的情况，而我们需要一个更通用的梯度计算函数，能够接受任意数量的参数。
 ```python
@@ -68,10 +68,10 @@ def nabla(objective_func: Callable[[List[float]], float],
     
     current_loss = objective_func(theta)
     
-    def get_grad(theta: List[float], i: int) -> float:
+    def get_grad(theta_copy: List[float], i: int) -> float:
 
-        theta[i] += delta
-        new_loss = objective_func(theta)
+        theta_copy[i] += delta
+        new_loss = objective_func(theta_copy)
         return (new_loss - current_loss) / delta
 
     gradients = [get_grad(theta.copy(), i) for i in range(len(theta))]
@@ -99,10 +99,10 @@ theta = [0.0, 0.0]
 grad = nabla(objective_func, theta)  # 假设返回[-62.63, -12.4]
 
 # 直接使用梯度更新
-new_theta = [theta[0] - grad[0], theta[1] - grad[1]]  # [62.63, 12.4]
+theta_new = [theta[0] - grad[0], theta[1] - grad[1]]  # [62.63, 12.4]
 
 # 得出损失
-print(line_objective(new_theta))
+print(line_objective(theta_new))
 ```
 这个参数的出来的损失高达$113,763.027$！这就像从山坡上跳向谷底，结果飞过了整个山谷，并且冲上了天空。
 
@@ -130,16 +130,16 @@ learning_rate = 0.01
 def update_v1(theta: List[float]) -> List[float]:
   
     # 求导
-    grad = nabla(line_objective, theta)
+    gradient = nabla(line_objective, theta)
     # 根据导数g和学习率learning_rate更新参数
     # 这里假设了p和g都是数值，可以直接应用乘法和减法
-    return [p - learning_rate * g for p, g in zip(theta, grad)]
+    return [p - learning_rate * g for p, g in zip(theta, gradient)]
 
 ```
 测试一下这个更新函数好不好用：
 ```python
 
-theta_history = revise(update_with_loss(update_v1), 1000, initial_theta)
+theta_history = revise(update_v1), 1000, initial_theta)
 ```
 得到的结果是[1.0499806157842302, 6.016510481423397e-05]这跟我们之前预测非常接近，画图来看几乎看不出区别。
 从目标函数值的变化率也可以看出来，损失在逐渐接近0。
@@ -238,7 +238,7 @@ optimized_plane_theta = gradient_descent(
     objective_func=plane_objective,
     initial_theta=initial_plane_theta,
     learning_rate=0.001,
-    num_revisions=5000
+    num_revisions=2000
 )
 # TypeError: 'float' object is not iterable
 ```
@@ -246,7 +246,7 @@ optimized_plane_theta = gradient_descent(
 
 修改nabla和update函数能让测试通过，可以自行尝试。要想比较优雅地解决这个问题，还需要先学习一个概念，我们下一篇文章处理。
 
-有趣的是，书中这个测试也通过了。原因是书中更早的时候就介绍了更复杂和数据结构以及操作；而且并没有给出nabla函数——也就是数值微分——的实现方案，想尝试书中代码的时候也只需要调用库函数。这么设计的原因是想专注于理解神经网络的相关概念。对微积分比较了解的朋友可以想一想怎么用链式法则来完成自动求导。
+有趣的是，书中这个测试也通过了。原因是书中更早的时候就介绍了更复杂和数据结构以及操作；而且并没有给出nabla函数——也就是数值微分——的实现方案，想尝试书中代码的时候也只需要调用库函数。这么设计的原因是想专注于理解神经网络的相关概念。对微积分比较了解的朋友可以想一想怎么用链式法则来完成自动求导；不了解也完全不用着急，等神经网络讲完了，会有一篇博文讲自动求导。
 
 #### 总结
 在本文中，我们深入探索了梯度下降算法。其核心在于：  
