@@ -68,7 +68,7 @@
                   <br>
                   <span class="series-rating">推荐阅读:</span>
                   <span class="series-rating-stars">
-                    {% assign rating = post.rating | default: 2 %}
+                    {% assign rating = series.rating | default: 3 %}
                     {% for i in (1..5) %}
                       {% if i <= rating %}
                         <span style="color: gold;">&#9733;</span>
@@ -131,9 +131,21 @@
         </ul>
       </section>
       <aside id="sidebar">
-
-
-      </aside>
+           <div class="sidebar-contact" style="margin-bottom: 2em;">
+            <h3 style="font-size: 1.1em; color: #2879d0; margin-bottom: 0.5em;">Contact Me</h3>
+            <div style="display: flex; gap: 1.2em; align-items: center;">
+              <a href="mailto:ray@raycc.com" title="Email">
+                <img src="{{ '/assets/images/icons8-gmail.svg' | relative_url }}" alt="Email" style="width: 32px; height: 31px; object-fit: contain;" />
+              </a>
+              <a href="https://discord.com/users/857812023978623036" title="Discord" target="_blank" rel="noopener">
+                <img src="{{ '/assets/images/Discord-Symbol-Blurple.svg'}}" alt="Discord" style="width: 29px; height: 29px; object-fit: contain;" />
+              </a>
+              <a href="/assets/images/mywechat.jpg" title="WeChat">
+                <img src="{{ '/assets/images/icons8-wechat-480.svg' | relative_url }}" alt="WeChat" style="width: 32px; height: 32px; object-fit: contain;" />
+              </a>
+            </div>
+          </div>
+        </aside>
     </div>
   </div>
 </body>

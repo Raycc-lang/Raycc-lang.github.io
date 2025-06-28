@@ -2,6 +2,7 @@
 layout: default
 title:  "什么是路由器？如何设置Archlinux作为软路由?"
 date:   2025-02-25 00:13:22 +0800
+rating: 1
 categories: jekyll update
 ---
 
