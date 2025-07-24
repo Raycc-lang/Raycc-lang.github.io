@@ -1,7 +1,4 @@
 ---
-
-### (四) 梯度下降的变体
-
 layout: default
 series_title: "零基础深度学习：The Little Learner代码实践"
 title:  "(四) 优化器"
