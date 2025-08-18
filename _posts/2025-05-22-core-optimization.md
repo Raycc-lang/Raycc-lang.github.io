@@ -193,19 +193,18 @@ def update_v0(theta: List[float]) -> List[float]:
     return [w, b]
 
 ```
-为了观察损失值随参数$θ$的变化情况，我们需要记录每次更新后的$θ$值及其对应的损失：
+运行这个迭代算法，得到结果：
 ```python
 
-training_history = revise(update_v0, 200, initial_theta)
-
-ws = [theta[0] for theta in training_history]
-losses = [objective(theta) for theta in training_history]
+theta = revise(update_v0, 200, initial_theta)
 ```
-绘制w和loss的关系图得到：
+结果好像不太正确。
+
+可视化损失随W的变化得到：
 
 ![w-loss](/assets/images/plot-ws-to-losses.png)
 
-现在可以看图目测得到一个合理的$θ$值……显然，update_v0是一个非常朴素的算法，它无法智能地判断何时接近最优解，也无法保证损失值持续下降。我们需要一种更智能的方法，能够引导损失值稳定地朝向最小值（理想情况下是$0$）下降，这将会是下一篇文章的主题。
+现在可以看图目测得到一个合理的$w$值……显然，update_v0是一个非常朴素的算法，它无法智能地判断何时接近最优解，也无法保证损失值持续下降。我们需要一种更智能的方法，能够引导损失值稳定地朝向最小值（理想情况下是$0$）下降，这将会是下一篇文章的主题。
 
 #### 总结
 

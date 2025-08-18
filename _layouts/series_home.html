@@ -1,0 +1,93 @@
+---
+# Layout for a single series landing page
+---
+<!DOCTYPE html>
+<html lang="{{ site.lang | default: 'en-US' }}">
+
+<head>
+  <meta charset='utf-8'>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}"
+    media="screen" type="text/css">
+  <link rel="stylesheet" href="{{ '/assets/css/print.css' | relative_url }}" media="print" type="text/css">
+  {% include head-custom.html %}
+</head>
+
+<body>
+  <header>
+    <div class="inner">
+      <a href="{{ '/' | absolute_url }}">
+        <h1>{{ site.title | default: site.github.repository_name }}</h1>
+      </a>
+      <h2>{{ site.description | default: site.github.project_tagline }}</h2>
+    </div>
+  </header>
+  <div id="content-wrapper">
+    <div class="inner clearfix">
+      <section id="main-content">
+        {% assign current_series = page.series_title | default: page.title %}
+        <h2 style="margin-bottom: .3em;">{{ current_series }}</h2>
+        {% if page.subtitle %}
+          <p class="post-meta" style="margin-top:0;">{{ page.subtitle }}</p>
+        {% endif %}
+
+        {{ content }}
+
+        {% assign series_posts = site.posts | where: 'series_title', current_series %}
+        {% assign sorted_series_posts = series_posts | sort: 'date' %}
+
+        {% if sorted_series_posts and sorted_series_posts.size > 0 %}
+          {% assign first_post = sorted_series_posts | first %}
+          {% assign last_post = sorted_series_posts | last %}
+          <p class="series-meta" style="color:#666;">
+            起止日期: {{ first_post.date | date: '%b %-d, %Y' }} ~ {{ last_post.date | date: '%b %-d, %Y' }}
+          </p>
+
+          <ul class="post-list" style="list-style: none; padding-left: 0;">
+          {% for subpost in sorted_series_posts %}
+            <li style="margin-bottom: 1.2em;">
+              <h3 style="margin: 0;">
+                <a class="post-link" href="{{ subpost.url | relative_url }}">{{ subpost.title | escape }}</a>
+              </h3>
+              <span class="post-meta">{{ subpost.date | date: '%b %-d, %Y' }}</span>
+              <br>
+              <span class="post-rating">推荐阅读:</span>
+              <span class="post-rating-stars">
+                {% assign rating = subpost.rating | default: 2 %}
+                {% for i in (1..5) %}
+                  {% if i <= rating %}
+                    <span style="color: gold;">&#9733;</span>
+                  {% else %}
+                    <span style="color: #ccc;">&#9733;</span>
+                  {% endif %}
+                {% endfor %}
+              </span>
+            </li>
+          {% endfor %}
+          </ul>
+        {% else %}
+          <p>这个系列还没有文章。请稍后再来。</p>
+        {% endif %}
+      </section>
+      <aside id="sidebar">
+        <div class="sidebar-contact" style="margin-bottom: 2em;">
+          <h3 style="font-size: 1.1em; color: #2879d0; margin-bottom: 0.5em;">Contact Me</h3>
+          <div style="display: flex; gap: 1.2em; align-items: center;">
+            <a href="mailto:ray@raycc.com" title="Email">
+              <img src="{{ '/assets/images/icons8-gmail.svg' | relative_url }}" alt="Email" style="width: 32px; height: 31px; object-fit: contain;" />
+            </a>
+            <a href="https://discord.com/users/857812023978623036" title="Discord" target="_blank" rel="noopener">
+              <img src="{{ '/assets/images/Discord-Symbol-Blurple.svg'}}" alt="Discord" style="width: 29px; height: 29px; object-fit: contain;" />
+            </a>
+            <a href="usrername:ray_cc_org" title="WeChat">
+              <img src="{{ '/assets/images/icons8-wechat-480.svg' | relative_url }}" alt="WeChat" style="width: 32px; height: 32px; object-fit: contain;" />
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</body>
+
+</html>
