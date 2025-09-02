@@ -1,7 +1,7 @@
 ---
-layout: default
 title: 系列合集
 permalink: /series/
+series: true
 ---
 
 
