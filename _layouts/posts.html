@@ -80,11 +80,15 @@
       gap: 1rem;
       margin-top: 0.5rem;
     }
-    
+
     .post-rating {
       display: flex;
       align-items: center;
       gap: 0.5rem;
+    }
+
+    .inner {
+     margin-left: 20%; 
     }
     
     .post-rating-stars span {
@@ -105,7 +109,7 @@
     </div>
   </header>
   <div id="content-wrapper">
-    <div class="inner clearfix">
+    <div class="inner clearfix" id="list">
       <section id="main-content">
         {{ content }}
         <h1>Latest Posts</h1>
@@ -117,11 +121,7 @@
           {% for post in site.posts %}
             <li>
               <div class="post-title-line">
-                {% if post.series_title %}
-                  <span class="post-type-indicator post-type-series">系列文章</span>
-                {% else %}
-                  <span class="post-type-indicator post-type-individual">独立文章</span>
-                {% endif %}
+                
                 <div class="post-title-content">
                   <h3>
                     <a class="post-link" href="{{ post.url | relative_url }}">
@@ -130,9 +130,10 @@
                   </h3>
                   {% if post.series_title %}
                     <div class="series-info">
-                      系列: <a href="{{ '/series' | relative_url }}#{{ post.series_title | slugify }}">{{ post.series_title }}</a>
+                      系列📚: <a href="{{ '/series' | relative_url }}#{{ post.series_title | slugify }}">{{ post.series_title }}</a>
                     </div>
                   {% endif %}
+                  
                 </div>
               </div>
               

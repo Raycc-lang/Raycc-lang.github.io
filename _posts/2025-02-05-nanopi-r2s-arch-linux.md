@@ -6,7 +6,7 @@ categories: jekyll update
 rating: 1
 ---
 
-### 想装Arch Linux
+#### 想装Arch Linux
 最近我给自己的Nanopi-R2s上安装了Arch Linux，这里记录一下心得。本文写适合那些想了解计算机启动过程的朋友，当然，对于想给自己的ARM设备刷ArchLinuxARM的朋友也会有帮助。
 
 在没有官方支持的硬件上部署Arch Arm对新手来说有难度，但同时也是深入理解Linux底层架构机会——这正是Arch的价值，它强制用户直面底层配置。
@@ -14,7 +14,7 @@ rating: 1
 网上虽然有一些教程可供参考，但是大多数都只提供操作步骤，如果不理解每个步骤的意义，出了问题就会很难处理。我不打算也写一篇那样的教程，而是会对比PC架构，聊一下ARM的启动过程，然后详细解释部署流程。
 
 
-### ARM 设备的启动流程
+#### ARM 设备的启动流程
 要成功部署系统，首先要理解设备从通电到系统就绪的全过程。我们将其简化为三个阶段：。
 1. 固件初始化阶段： 
     - 传统PC：BIOS（Basic Input Output System）完成硬件初始化、POST自检、启动设备选择
@@ -42,7 +42,7 @@ rating: 1
 |rootfs	|根文件系统	|Arch Linux ARM官方镜像
 
 
-### 实战部署流程
+#### 实战部署流程
 
 参考[FriendlyElec Wiki](https://wiki.friendlyelec.com/wiki/index.php/NanoPi_R2S/zh#.E5.A6.82.E4.BD.95.E7.BC.96.E8.AF.91.E7.B3.BB.E7.BB.9F)配置交叉编译环境：
 ```bash
@@ -167,7 +167,7 @@ booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}
 想了解这个命令可以上网查询，这里就不详细介绍了。
 到了这一步我们有了U-boot作为启动加载程序，就基本完成了，然后插电看看是不是已经搞定了。
 
-### 必坑指南
+#### 必坑指南
 通过USB-TTL模块查看启动日志。我没有这个模块，如果指示灯不显示好了，我也不知道问题出在那个环节，浪费了很多时间。
 
 现在想来最好从Armbian这个项目下载一个能用的系统, 测试Uboot和boot.scr或者extlinux.conf能不能工作，最后再刷入Arch的文件系统了。
