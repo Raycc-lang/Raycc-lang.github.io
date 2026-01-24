@@ -10,191 +10,85 @@
     <link rel="stylesheet" href="{{ '/assets/css/print.css' | relative_url }}" media="print" type="text/css">
     {% include head-custom.html %}
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        /* Reset and base */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f5f5f5; color: #333; line-height: 1.6; }
 
-        body {
-            background: #f5f5f5;
-            color: #333;
-            line-height: 1.6;
-        }
+        /* Lightweight card/grid for the homepage concepts */
+        .title { text-align: center; margin-bottom: 40px; font-size: 2.5em; color: #2c3e50; }
 
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 30px; margin-bottom: 40px; }
 
-        .title {
-            text-align: center;
-            margin-bottom: 40px;
-            font-size: 2.5em;
-            color: #2c3e50;
-        }
+        .card { background: white; border-radius: 12px; overflow: hidden; transition: transform 0.3s ease; }
+        .card:hover { transform: translateY(-5px); }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
-        }
+        /* Design 4: hero / asymmetric section */
+        .design4 { background: rgb(209, 222, 244); position: relative; padding: 40px; overflow: hidden; }
 
-        .card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-
-        /* Design 4: Modern Asymmetric */
-        .design4 {
-            background: rgb(209, 222, 244);
-            position: relative;
-            padding: 40px;
-        }
-
+        /* Decorative background panel - will be simplified on small screens */
         .design4::before {
             content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 80%;
-            height: 100%;
-            /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
+            position: absolute; top: 0; left: 0; width: 80%; height: 100%;
             background: #2e7bcf url(/assets/images/header-bg.jpg) 0 0 repeat-x;
-            background-size: auto 100%;  /* Ensure full height coverage */
-            border-bottom: solid 1px #275da1;
+            background-size: cover; border-bottom: solid 1px #275da1;
             clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
         }
 
         .content {
             font-family: 'Architects Daughter', 'Helvetica Neue', Helvetica, Arial, serif;
-            position: relative;
-            z-index: 2;
-            color: white;
-            max-width: 50%;
-            padding-top: 60px;
-            Margin-left: 15%;
+            position: relative; z-index: 2; color: white; max-width: 50%; padding-top: 60px; margin-left: 15%;
         }
+        .content a { color: black; }
 
-        .content a {
-            font-family: 'Architects Daughter', 'Helvetica Neue', Helvetica, Arial, serif;
-            color: black;
-        }
+        /* Header inside this layout (keeps visual style but avoid fixed widths) */
+        header { padding-top: 40px; padding-bottom: 40px; font-family: 'Architects Daughter', 'Helvetica Neue', Helvetica, Arial, serif; color: #666; background: #fafafa url(/assets/images/body-bg.jpg) 0 0 repeat-x; border-bottom: solid 1px #275da1; }
+        header h1 { margin-top: 0; margin-bottom: 0.2em; font-size: 72px; font-weight: normal; line-height: 1; color: #9ddcff; letter-spacing: -1px; margin-left: 15%; }
+        header h2 { margin-top: 0; margin-bottom: 0; font-size: 26px; font-weight: normal; line-height: 1.3; color: #9ddcff; }
 
-        header {
-            padding-top: 40px;
-            padding-bottom: 40px;
-            font-family: 'Architects Daughter', 'Helvetica Neue', Helvetica, Arial, serif;
-            color: #666;
-            background: #fafafa url(/assets/images/body-bg.jpg) 0 0 repeat-x;
-            border-bottom: solid 1px #275da1;
-        }
+        .design4 p { margin-bottom: 30px; opacity: 0.95; }
 
-        header h1 {
-            width: 540px;
-            margin-top: 0;
-            margin-bottom: 0.2em;
-            font-size: 72px;
-            font-weight: normal;
-            line-height: 1;
-            color: #9ddcff;
-            ;
-            letter-spacing: -1px;
-            margin-left: 17%;
-        }
+        /* Navigation inside the hero - absolute on wide screens */
+        .nav { position: absolute; right: 40px; top: 50%; transform: translateY(-50%); z-index: 2; }
+        .nav a { display: block; margin-bottom: 15px; color: #333; text-decoration: none; font-weight: 500; padding: 10px 15px; background: rgba(255,255,255,0.9); border-radius: 6px; transition: all 0.3s ease; }
+        .nav a:hover { background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
 
-        header h2 {
-            width: 540px;
-            margin-top: 0;
-            margin-bottom: 0;
-            font-size: 26px;
-            font-weight: normal;
-            line-height: 1.3;
-            color: #9ddcff;
-            letter-spacing: 0;
-        }
+        .lang-toggle { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2); border: none; color: #2e7bcf; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.9em; }
 
-        .design4 p {
-            margin-bottom: 30px;
-            opacity: 0.9;
-        }
+        .description { background: white; padding: 20px; text-align: center; color: #666; font-style: italic; }
 
-        .nav {
-            position: absolute;
-            right: 40px;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 2;
-        }
+        /* Contact card - keep it accessible but not overlapping on small screens */
+        #contact { position: absolute; bottom: 20px; right: 20px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 10; display: none; }
+        #contact.show { display: block; }
+        #contact h3 { margin: 0 0 10px 0; font-size: 1.1em; color: #2879d0; }
 
-        .nav a {
-            display: block;
-            margin-bottom: 15px;
-            color: #333;
-            text-decoration: none;
-            font-weight: 500;
-            padding: 10px 15px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 6px;
-            transition: all 0.3s ease;
-        }
+        /* Language sections: hide Chinese by default in the DOM until JS toggles */
+        #english { display: none; }
 
-        .nav a:hover {
-            background: white;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
+        /* Mobile / small-screen adjustments */
+        @media (max-width: 767px) {
+            .grid { grid-template-columns: 1fr; gap: 16px; }
+            .card { border-radius: 8px; box-shadow: none; }
 
-        .lang-toggle {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: #2e7bcf;
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9em;
-        }
+            /* Simplify or remove the decorative overlay to avoid clipping and horizontal scroll */
+            .design4::before { display: none; }
 
-        .description {
-            background: white;
-            padding: 20px;
-            text-align: center;
-            color: #666;
-            font-style: italic;
-        }
+            /* Make content full-width and readable */
+            .content { max-width: 100%; margin: 0; padding: 20px; color: #222; }
+            .content a { color: #2879d0; }
 
-        #contact {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 10;
-            display: none;
-        }
+            /* Header scale-down */
+            header h1 { font-size: 36px; }
+            header h2 { font-size: 18px; }
 
-        #contact.show {
-            display: block;
-        }
+            /* Move nav into document flow so it doesn't overlap the content */
+            .nav { position: static; transform: none; display: flex; gap: 8px; justify-content: center; margin-top: 16px; }
+            .nav a { display: inline-block; margin: 0; padding: 8px 12px; }
 
-        #contact h3 {
-            margin: 0 0 10px 0;
-            font-size: 1.1em;
-            color: #2879d0;
-        }
+            .lang-toggle { position: static; margin: 12px; }
 
-        /* Language sections: hide Chinese by default */
-        #english {
-            display: none;
+            /* Contact appears below content when toggled */
+            #contact { position: static; right: auto; bottom: auto; margin: 12px 0; display: none; }
+            #contact.show { display: block; }
         }
     </style>
 </head>
@@ -220,7 +114,7 @@
             <div class="nav">
                 <a href="/posts">Latest Posts</a>
                 <a href="/series">Article Series</a>
-                <a href="">About</a>
+                <a href="/about/">About Me</a>
                 <a href="#contact" id="connect-link">Connect</a>
             </div>
 
