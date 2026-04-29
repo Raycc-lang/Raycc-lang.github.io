@@ -1,205 +1,489 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="{{ site.lang | default: 'en' }}">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Homepage Design Concepts</title>
-    <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}"
-        media="screen" type="text/css">
-    <link rel="stylesheet" href="{{ '/assets/css/print.css' | relative_url }}" media="print" type="text/css">
-    {% include head-custom.html %}
-    <style>
-        /* Reset and base */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #f5f5f5; color: #333; line-height: 1.6; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ site.title | default: "Ray's Blog" }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap" rel="stylesheet">
+<style>
+  /* ---------- Reset ---------- */
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
 
-        /* Lightweight card/grid for the homepage concepts */
-        .title { text-align: center; margin-bottom: 40px; font-size: 2.5em; color: #2c3e50; }
+  /* ---------- Architect-inspired base ---------- */
+  :root {
+    --arch-blue: #2e7bcf;
+    --arch-blue-dark: #275da1;
+    --arch-link: #2879d0;
+    --arch-link-hover: #2268b2;
+    --arch-light-blue: #9ddcff;
+    --arch-text: #474747;
+    --arch-muted: #666;
+    --arch-bg: #fafafa;
+    --arch-card: #ffffff;
+    --arch-border: #e0e4ea;
+    --arch-rule: #ddd;
+    --arch-display: 'Architects Daughter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --arch-body: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 30px; margin-bottom: 40px; }
+  body {
+    font-family: var(--arch-body);
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--arch-muted);
+    background: var(--arch-bg);
+    /* Subtle paper-like texture in pure CSS to evoke body-bg.jpg */
+    background-image:
+      radial-gradient(rgba(0,0,0,0.025) 1px, transparent 1px),
+      radial-gradient(rgba(0,0,0,0.02) 1px, transparent 1px);
+    background-size: 6px 6px, 14px 14px;
+    background-position: 0 0, 3px 3px;
+  }
 
-        .card { background: white; border-radius: 12px; overflow: hidden; transition: transform 0.3s ease; }
-        .card:hover { transform: translateY(-5px); }
+  a { color: var(--arch-link); text-decoration: none; }
+  a:hover { color: var(--arch-link-hover); }
 
-        /* Design 4: hero / asymmetric section */
-        .design4 { background: rgb(209, 222, 244); position: relative; padding: 40px; overflow: hidden; }
+  .inner {
+    width: 100%;
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 0 20px;
+    position: relative;
+  }
 
-        /* Decorative background panel - will be simplified on small screens */
-        .design4::before {
-            content: '';
-            position: absolute; top: 0; left: 0; width: 80%; height: 100%;
-            background: #2e7bcf url(/assets/images/header-bg.jpg) 0 0 repeat-x;
-            background-size: cover; border-bottom: solid 1px #275da1;
-            clip-path: polygon(0 0, 100% 0, 90% 100%, 0% 100%);
-        }
+  /* ---------- Header ---------- */
+  header {
+    padding: 50px 0 60px;
+    color: #fff;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.08)),
+      var(--arch-blue);
+    border-bottom: 1px solid var(--arch-blue-dark);
+    position: relative;
+    overflow: hidden;
+  }
+  /* Subtle blueprint grid lines on header */
+  header::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
+  }
 
-        .content {
-            font-family: 'Architects Daughter', 'Helvetica Neue', Helvetica, Arial, serif;
-            position: relative; z-index: 2; color: white; max-width: 50%; padding-top: 60px; margin-left: 15%;
-        }
-        .content a { color: black; }
+  header .inner { z-index: 2; }
 
-        /* Header inside this layout (keeps visual style but avoid fixed widths) */
-        header { padding-top: 40px; padding-bottom: 40px; font-family: 'Architects Daughter', 'Helvetica Neue', Helvetica, Arial, serif; color: #666; background: #fafafa url(/assets/images/body-bg.jpg) 0 0 repeat-x; border-bottom: solid 1px #275da1; }
-        header h1 { margin-top: 0; margin-bottom: 0.2em; font-size: 72px; font-weight: normal; line-height: 1; color: #9ddcff; letter-spacing: -1px; margin-left: 15%; }
-        header h2 { margin-top: 0; margin-bottom: 0; font-size: 26px; font-weight: normal; line-height: 1.3; color: #9ddcff; }
+  header .brand { display: block; color: #fff; }
+  header h1 {
+    font-family: var(--arch-display);
+    font-size: 72px;
+    font-weight: normal;
+    line-height: 1;
+    margin: 0 0 0.18em 0;
+    letter-spacing: -1px;
+    color: #fff;
+  }
+  header h2 {
+    font-family: var(--arch-display);
+    font-size: 26px;
+    font-weight: normal;
+    color: var(--arch-light-blue);
+    margin: 0;
+    line-height: 1.3;
+  }
 
-        .design4 p { margin-bottom: 30px; opacity: 0.95; }
+  /* Top utility bar: nav + lang toggle */
+  .topbar {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .topnav {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .topnav a {
+    font-family: var(--arch-display);
+    color: #fff;
+    font-size: 16px;
+    padding: 6px 12px;
+    border: 1px solid rgba(255,255,255,0.45);
+    border-radius: 4px;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .topnav a:hover {
+    background: var(--arch-light-blue);
+    color: var(--arch-blue-dark);
+    border-color: var(--arch-light-blue);
+  }
 
-        /* Navigation inside the hero - absolute on wide screens */
-        .nav { position: absolute; right: 40px; top: 50%; transform: translateY(-50%); z-index: 2; }
-        .nav a { display: block; margin-bottom: 15px; color: #333; text-decoration: none; font-weight: 500; padding: 10px 15px; background: rgba(255,255,255,0.9); border-radius: 6px; transition: all 0.3s ease; }
-        .nav a:hover { background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+  .lang-toggle {
+    font-family: var(--arch-display);
+    font-size: 15px;
+    background: rgba(255,255,255,0.95);
+    color: var(--arch-blue-dark);
+    border: 1px solid rgba(255,255,255,0.9);
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+  }
+  .lang-toggle:hover { background: var(--arch-light-blue); }
 
-        .lang-toggle { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2); border: none; color: #2e7bcf; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-size: 0.9em; }
+  /* ---------- Main content ---------- */
+  main {
+    padding: 40px 0 20px;
+    border-top: solid 1px #fff;
+  }
 
-        .description { background: white; padding: 20px; text-align: center; color: #666; font-style: italic; }
+  /* Architect-style headings with slash markers */
+  .section-title {
+    font-family: var(--arch-display);
+    font-weight: normal;
+    color: var(--arch-text);
+    letter-spacing: -1px;
+    margin: 0 0 0.4em;
+  }
+  h1.section-title { font-size: 2.6em; }
+  h2.section-title { font-size: 1.55em; font-weight: bold; margin-top: 0; }
 
-        /* Contact card - keep it accessible but not overlapping on small screens */
-        #contact { position: absolute; bottom: 20px; right: 20px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 10; display: none; }
-        #contact.show { display: block; }
-        #contact h3 { margin: 0 0 10px 0; font-size: 1.1em; color: #2879d0; }
+  .section-title::before {
+    color: var(--arch-light-blue);
+    padding-right: 0.3em;
+  }
+  h1.section-title::before { content: "/"; }
+  h2.section-title::before { content: "//"; }
 
-        /* Language sections: hide Chinese by default in the DOM until JS toggles */
-        #english { display: none; }
+  .lede { font-size: 1.05em; color: var(--arch-muted); margin: 0 0 1.4em; }
 
-        /* Mobile / small-screen adjustments */
-        @media (max-width: 767px) {
-            .grid { grid-template-columns: 1fr; gap: 16px; }
-            .card { border-radius: 8px; box-shadow: none; }
+  /* Featured posts grid */
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+    margin: 28px 0 40px;
+  }
+  .feature {
+    background: var(--arch-card);
+    border: 1px solid var(--arch-border);
+    padding: 22px 22px 20px;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    position: relative;
+  }
+  .feature:hover {
+    transform: translateY(-2px);
+    border-color: #c9d4e3;
+    box-shadow: 0 4px 14px rgba(40,121,208,0.08);
+  }
+  .feature .tag {
+    font-family: var(--arch-display);
+    color: var(--arch-light-blue);
+    font-size: 14px;
+    letter-spacing: 1px;
+  }
+  .feature h3 {
+    font-family: var(--arch-display);
+    font-size: 1.25em;
+    font-weight: bold;
+    color: var(--arch-text);
+    margin: 4px 0 8px;
+  }
+  .feature h3 a { color: var(--arch-text); }
+  .feature h3 a:hover { color: var(--arch-link); }
+  .feature p { margin: 0 0 14px; color: var(--arch-muted); }
+  .feature .read {
+    font-family: var(--arch-display);
+    color: var(--arch-link);
+    font-size: 14px;
+  }
+  .feature .read::after { content: " →"; }
 
-            /* Simplify or remove the decorative overlay to avoid clipping and horizontal scroll */
-            .design4::before { display: none; }
+  /* About section */
+  .about-section p { margin: 0 0 12px; }
 
-            /* Make content full-width and readable */
-            .content { max-width: 100%; margin: 0; padding: 20px; color: #222; }
-            .content a { color: #2879d0; }
+  /* Contact section */
+  .contact-section {
+    background: var(--arch-card);
+    border: 1px solid var(--arch-border);
+    padding: 32px;
+    margin: 30px 0 50px;
+  }
+  .contact-section h2 {
+    font-family: var(--arch-display);
+    margin: 0 0 24px;
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--arch-heading);
+  }
+  .contact-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+  .contact-item { flex: 1 1 200px; }
+  .contact-label {
+    font-weight: 700;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--arch-muted);
+    margin-bottom: 4px;
+  }
+  .contact-value {
+    font-size: 0.95rem;
+    color: var(--arch-text);
+  }
+  .contact-value a {
+    color: var(--arch-accent);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .contact-value a:hover {
+    color: var(--arch-heading);
+    text-decoration: underline;
+  }
 
-            /* Header scale-down */
-            header h1 { font-size: 36px; }
-            header h2 { font-size: 18px; }
+  /* Lang content visibility */
+  .lang { display: none; }
+  .lang.active { display: block; }
 
-            /* Move nav into document flow so it doesn't overlap the content */
-            .nav { position: static; transform: none; display: flex; gap: 8px; justify-content: center; margin-top: 16px; }
-            .nav a { display: inline-block; margin: 0; padding: 8px 12px; }
+  /* Footer */
+  footer {
+    border-top: 1px solid var(--arch-rule);
+    padding: 24px 0 36px;
+    color: #aaa;
+    font-size: 13px;
+  }
+  footer .inner { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+  footer a { color: var(--arch-muted); }
+  footer a:hover { color: var(--arch-text); }
 
-            .lang-toggle { position: static; margin: 12px; }
-
-            /* Contact appears below content when toggled */
-            #contact { position: static; right: auto; bottom: auto; margin: 12px 0; display: none; }
-            #contact.show { display: block; }
-        }
-    </style>
+  /* ---------- Responsive ---------- */
+  @media (max-width: 767px) {
+    header { padding: 24px 0 32px; }
+    header h1 { font-size: 44px; }
+    header h2 { font-size: 20px; }
+    .topbar { padding-bottom: 18px; }
+    .topnav a { font-size: 14px; padding: 5px 9px; }
+    .split { grid-template-columns: 1fr; gap: 22px; }
+    h1.section-title::before,
+    h2.section-title::before { content: none; padding-right: 0; }
+  }
+</style>
+  {% include head-custom.html %}
 </head>
-
 <body>
-    <header>
-        <div class="inner, showcase">
-            <a href="{{ '/' | absolute_url }}">
-                <h1>{{ site.title | default: site.github.repository_name }}</h1>
-            </a>
-            <h2>{{ site.description | default: site.github.project_tagline }}</h2>
-        </div>
-    </header>
 
-
-
-    <div class="card">
-        <div class=" design4">
-            <button class="lang-toggle">EN / 中文</button>
-
-            {% include home-content.html %}
-
-            <div class="nav">
-                <a href="/posts">Latest Posts</a>
-                <a href="/series">Article Series</a>
-                <a href="/about/">About Me</a>
-                <a href="#contact" id="connect-link">Connect</a>
-            </div>
-
-            <div id="contact" style="margin-bottom: 2em;">
-                <h3 style="font-size: 1.1em; color: #2879d0; margin-bottom: 0.5em;">Contact Me</h3>
-                <div style="display: flex; gap: 1.2em; align-items: center;">
-                    <a href="mailto:ray@raycc.com" title="Email">
-                        <img src="{{ '/assets/images/icons8-gmail.svg' | relative_url }}" alt="Email"
-                            style="width: 32px; height: 31px; object-fit: contain;" />
-                    </a>
-                    <a href="https://discord.com/users/857812023978623036" title="Discord" target="_blank"
-                        rel="noopener">
-                        <img src="{{ '/assets/images/Discord-Symbol-Blurple.svg'}}" alt="Discord"
-                            style="width: 29px; height: 29px; object-fit: contain;" />
-                    </a>
-                    <a href="usrername:ray_cc_org" title="WeChat">
-                        <img src="{{ '/assets/images/icons8-wechat-480.svg' | relative_url }}" alt="WeChat"
-                            style="width: 32px; height: 32px; object-fit: contain;" />
-                    </a>
-                </div>
-            </div>
-
-        </div>
-
+<header>
+  <div class="inner">
+    <div class="topbar">
+      <nav class="topnav" aria-label="Primary">
+        <a href="{{ '/posts' | relative_url }}">Latest Posts</a>
+        <a href="{{ '/series' | relative_url }}">Article Series</a>
+        <a href="/about/">About Me</a>
+        <a href="#contact">Connect</a>
+      </nav>
+      <button class="lang-toggle" id="langToggle" aria-label="Toggle language">EN / 中文</button>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Contact reveal
-            var link = document.getElementById('connect-link');
-            var contact = document.getElementById('contact');
-            function showContact() {
-                if (!contact) return;
-                contact.classList.add('show');
-                contact.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-            if (link && contact) {
-                link.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    showContact();
-                    history.replaceState(null, '', '#contact');
-                });
-            }
-            if (location.hash === '#contact') {
-                showContact();
-            }
+    <a class="brand" href="/">
+      <h1>Ray's Blog</h1>
+      <h2 data-en="Notes on computing, from first principles."
+          data-zh="计算机相关领域的学习与实践笔记，关注原理。">Notes on computing, from first principles.</h2>
+    </a>
+  </div>
+</header>
 
-            // Language toggle
-            var toggleBtn = document.querySelector('.lang-toggle');
-            var english = document.getElementById('english');
-            var chinese = document.getElementById('chinese');
+<main>
+  <div class="inner">
 
-            function setLang(lang) {
-                if (!english || !chinese) return;
-                if (lang === 'zh') {
-                    english.style.display = 'none';
-                    chinese.style.display = 'block';
-                    if (toggleBtn) toggleBtn.textContent = '中文 / EN';
-                } else {
-                    english.style.display = 'block';
-                    chinese.style.display = 'none';
-                    if (toggleBtn) toggleBtn.textContent = 'EN / 中文';
-                }
-                try { localStorage.setItem('lang', lang); } catch (e) { }
-            }
+    <!-- ENGLISH -->
+    <section class="lang" id="lang-en" lang="en">
+      <h1 class="section-title">Welcome</h1>
+      <p class="lede">
+        Welcome to my blog. This is where I document my learning and hands-on practice
+        in computer science and related fields. My focus is on the underlying principles —
+        starting from foundational concepts to explain the essence, design logic, and
+        working principles of technology. The goal is to make these ideas accessible
+        to beginners and non-experts, while offering experienced readers a systematic
+        framework for consolidation and reinforcement.
+      </p>
 
-            // Initialize language
-            var initial = 'zh';
-            try {
-                initial = localStorage.getItem('lang') || initial;
-            } catch (e) { }
-            if (!initial) {
-                initial = (navigator.language || '').toLowerCase().includes('zh') ? 'zh' : 'en';
-            }
-            setLang(initial);
+      <h2 class="section-title">Featured</h2>
+      <div class="features">
+        <article class="feature">
+          <div class="tag">/ ARTICLE</div>
+          <h3><a href="{{ '/jekyll/update/2025/03/05/htdp1.html' | relative_url }}">What Is a Computer Program? How to Write One?</a></h3>
+          <p>If you've ever wondered what exactly you're "programming," this article reveals the thought process from real-world problems to code.</p>
+          <a class="read" href="{{ '/jekyll/update/2025/03/05/htdp1.html' | relative_url }}">Read article</a>
+        </article>
 
-            if (toggleBtn) {
-                toggleBtn.addEventListener('click', function () {
-                    var next = (english && english.style.display !== 'none') ? 'zh' : 'en';
-                    setLang(next);
-                });
-            }
-        });
-    </script>
+        <article class="feature">
+          <div class="tag">// SERIES</div>
+          <h3><a href="{{ '/series/the-tiny-learner/' | relative_url }}">Deep Learning Fundamentals</a></h3>
+          <p>AI is everywhere, yet its underlying technology is rarely discussed or often deemed too esoteric. This series offers a path to understanding that doesn't require deep mathematical background.</p>
+          <a class="read" href="{{ '/series/the-tiny-learner/' | relative_url }}">Browse series</a>
+        </article>
+
+        <article class="feature">
+          <div class="tag">/// ARCHIVE</div>
+          <h3><a href="{{ '/posts' | relative_url }}">All Posts</a></h3>
+          <p>You can find all articles here, covering various topics from Linux and networking fundamentals to specific hands-on projects.</p>
+          <a class="read" href="{{ '/posts' | relative_url }}">View archive</a>
+        </article>
+      </div>
+
+      <div class="split">
+        <div class="about-section">
+          <h2 class="section-title">About</h2>
+          <p>To learn more about me, please check the <a href="{{ '/about' | relative_url }}">About Me</a> page.
+             For any ideas or questions, feel free to <a href="#contact">contact me</a>.</p>
+        </div>
+      </div>
+
+      <aside class="contact-section" id="contact-en">
+        <h2>Connect</h2>
+        <div class="contact-grid">
+          <div class="contact-item">
+            <div class="contact-label">Email</div>
+            <div class="contact-value"><a href="mailto:{{ site.email | default: 'ray@raycc.org' }}">ray@raycc.org</a></div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-label">Discord</div>
+            <div class="contact-value"><a href="https://discord.com/users/857812023978623036" target="_blank" rel="noopener">@ray_cc</a></div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-label">WeChat</div>
+            <div class="contact-value">ray_cc_org</div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <!-- 中文 -->
+    <section class="lang" id="lang-zh" lang="zh">
+      <h1 class="section-title">欢迎</h1>
+      <p class="lede">
+        欢迎来到我的博客。这里主要记录我在计算机相关领域的学习和实践。
+        我关注原理层面的理解——从基础概念出发，解释技术的本质、设计逻辑与工作原理。
+        目标是让外行或新手也能跟上思路，同时为已有经验的读者提供系统性的梳理与巩固。
+      </p>
+
+      <h2 class="section-title">精选</h2>
+      <div class="features">
+        <article class="feature">
+          <div class="tag">/ 文章</div>
+          <h3><a href="{{ '/jekyll/update/2025/03/05/htdp1.html' | relative_url }}">什么是计算机程序？如何写一个程序？</a></h3>
+          <p>如果你曾疑惑编程到底在"编"什么，这篇文章将为你揭示从现实问题到代码的思维过程。</p>
+          <a class="read" href="{{ '/jekyll/update/2025/03/05/htdp1.html' | relative_url }}">阅读文章</a>
+        </article>
+
+        <article class="feature">
+          <div class="tag">// 系列</div>
+          <h3><a href="{{ '/series/the-tiny-learner/' | relative_url }}">深度学习基础</a></h3>
+          <p>到处都能听到 AI，但其底层技术却鲜被提及，或被认为太过深奥。这个系列提供了不需要深厚数学基础的理解路径。</p>
+          <a class="read" href="{{ '/series/the-tiny-learner/' | relative_url }}">浏览系列</a>
+        </article>
+
+        <article class="feature">
+          <div class="tag">/// 全部</div>
+          <h3><a href="{{ '/posts' | relative_url }}">全部文章</a></h3>
+          <p>你可以在这里找到所有文章，涵盖从 Linux、网络基础到具体实践项目的各类主题。</p>
+          <a class="read" href="{{ '/posts' | relative_url }}">查看归档</a>
+        </article>
+      </div>
+
+      <div class="split">
+        <div class="about-section">
+          <h2 class="section-title">关于</h2>
+          <p>想了解更多关于我的信息，请查看<a href="{{ '/about' | relative_url }}">关于我</a>。
+             如有任何想法或问题，欢迎<a href="#contact">与我联系</a>。</p>
+        </div>
+      </div>
+
+      <aside class="contact-section" id="contact-zh">
+        <h2>联系方式</h2>
+        <div class="contact-grid">
+          <div class="contact-item">
+            <div class="contact-label">邮箱</div>
+            <div class="contact-value"><a href="mailto:{{ site.email | default: 'ray@raycc.org' }}">ray@raycc.org</a></div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-label">Discord</div>
+            <div class="contact-value"><a href="https://discord.com/users/857812023978623036" target="_blank" rel="noopener">@ray_cc</a></div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-label">微信</div>
+            <div class="contact-value">ray_cc_org</div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="inner">
+    <div>© <span id="year"></span> Ray's Blog · Built with Jekyll &amp; the Architect theme</div>
+    <div><a href="/feed.xml">RSS</a> · <a href="https://github.com/raycc-lang">GitHub</a></div>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var btn = document.getElementById('langToggle');
+    var en = document.getElementById('lang-en');
+    var zh = document.getElementById('lang-zh');
+    var tagline = document.querySelector('header h2');
+
+    function setLang(lang) {
+      var isZh = lang === 'zh';
+      en.classList.toggle('active', !isZh);
+      zh.classList.toggle('active', isZh);
+      btn.textContent = isZh ? '中文 / EN' : 'EN / 中文';
+      if (tagline) tagline.textContent = tagline.getAttribute(isZh ? 'data-zh' : 'data-en');
+      document.documentElement.lang = isZh ? 'zh' : 'en';
+      try { localStorage.setItem('lang', lang); } catch (e) {}
+    }
+
+    var saved = null;
+    try { saved = localStorage.getItem('lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || '').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
+    }
+    setLang(saved);
+
+    btn.addEventListener('click', function () {
+      setLang(en.classList.contains('active') ? 'zh' : 'en');
+    });
+
+    // Smooth-scroll #contact links to the contact block of the active language
+    document.querySelectorAll('a[href="#contact"]').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        var target = document.querySelector(
+          (zh.classList.contains('active') ? '#contact-zh' : '#contact-en')
+        );
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+  })();
+</script>
 
 </body>
-
 </html>
