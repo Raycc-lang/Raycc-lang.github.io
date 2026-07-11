@@ -23,16 +23,19 @@ github:
   owner_name: "Ray"
   repository_url: "raycc.org"
 email: ray@raycc.org
-description: >- # this means to ignore newlines until "baseurl:"
+description: "计算机学习与实践笔记：Linux、网络与深度学习，从原理出发。Ray's notes on computing — Linux, networking, and deep learning, from first principles."
 
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "https://raycc.org/" # the base hostname & protocol for your site, e.g. http://example.com
+url: "https://raycc.org" # the base hostname & protocol for your site, e.g. http://example.com
 # twitter_username: jekyllrb
 # github_username:  jekyll
 theme: jekyll-theme-architect
 # Build settings
 plugins:
   - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
+  - jekyll-redirect-from
 
 # Exclude from processing.
 # The following items will not be processed, by default.

@@ -1,21 +1,22 @@
 ---
 layout: default
 title:  "计算机如何启动？如何部署Arch Linux Arm?"
+description: "对比PC与ARM架构的启动流程，详解如何在NanoPi R2S上部署Arch Linux ARM及安装过程中的常见坑点"
 date:   2025-02-04 14:29:22 +0800
 categories: jekyll update
 rating: 1
 ---
 
 #### 想装Arch Linux
-最近我给自己的Nanopi-R2s上安装了Arch Linux，这里记录一下心得。本文写适合那些想了解计算机启动过程的朋友，当然，对于想给自己的ARM设备刷ArchLinuxARM的朋友也会有帮助。
+最近我给自己的Nanopi-R2s上安装了Arch Linux，这里记录一下心得。本文适合那些想了解计算机启动过程的朋友，当然，对于想给自己的ARM设备刷ArchLinuxARM的朋友也会有帮助。
 
-在没有官方支持的硬件上部署Arch Arm对新手来说有难度，但同时也是深入理解Linux底层架构机会——这正是Arch的价值，它强制用户直面底层配置。
+在没有官方支持的硬件上部署Arch Arm对新手来说有难度，但同时也是深入理解Linux底层架构的机会——这正是Arch的价值，它强制用户直面底层配置。
 
 网上虽然有一些教程可供参考，但是大多数都只提供操作步骤，如果不理解每个步骤的意义，出了问题就会很难处理。我不打算也写一篇那样的教程，而是会对比PC架构，聊一下ARM的启动过程，然后详细解释部署流程。
 
 
 #### ARM 设备的启动流程
-要成功部署系统，首先要理解设备从通电到系统就绪的全过程。我们将其简化为三个阶段：。
+要成功部署系统，首先要理解设备从通电到系统就绪的全过程。我们将其简化为三个阶段：
 1. 固件初始化阶段： 
     - 传统PC：BIOS（Basic Input Output System）完成硬件初始化、POST自检、启动设备选择
 
@@ -25,7 +26,7 @@ rating: 1
     * x86：GRUB
     * ARM：U-Boot（嵌入式设备主流选择）
     * Windows：bootmgfw.efi（UEFI环境）
-1. 内核加载阶段。
+3. 内核加载阶段。
 这里存在一个"先有鸡还是先有蛋"的哲学问题：操作系统需要管理存储设备，但自身又存放在存储设备中。解决方案是：
    - Bootloader直接加载包含基础驱动和文件系统模块的内核
    - 通过initramfs（初始内存文件系统）建立临时根文件系统，最终挂载真正的根文件系统(rootfs)
@@ -71,12 +72,12 @@ rating: 1
 ```
 编译好之后把它刷入SD卡。因为SoC ROM不像BIOS有充足的空间，所以它的连接方式比较简单粗暴，就是从存储设备的固定位置读取。
 
-微星瑞芯片遵循它自己的[分区标准](https://opensource.rock-chips.com/wiki_Partitions)。
+瑞芯微芯片遵循它自己的[分区标准](https://opensource.rock-chips.com/wiki_Partitions)。
 
 | 阶段 |  名称      | 程序    | 文件    | 磁盘位置   
 | ---  | -------  | -------  | -------      | ------- 
 | 1      |  主引导   | ROM code | BootRom     |         
-| 2      |  二级引导    | U-Boot   |  boot-rockchip.bin  | 0x40    
+| 2      |  二级引导    | U-Boot   |  u-boot-rockchip.bin  | 0x40    
 |        |                  | TPL/SPL  |             |         
 | 3     |  boot分区 | Linux内核   | boot.img    | 0x8000  
 |       |        |  Initrd镜像    |   initramfs-linux.img         
@@ -85,7 +86,7 @@ rating: 1
 | 4   |   root文件系统   |          |             |   0x40000   
 
 
-请注意就像Bootloader不太够直接拉起系统，因此使用Initrd建立临时根文件系统一样，SoC ROM只能读取比较简单的程序，而U-boot相对于SoC显得像庞然大物，所以中间也有很多过度阶段。
+请注意就像Bootloader不太够直接拉起系统，因此使用Initrd建立临时根文件系统一样，SoC ROM只能读取比较简单的程序，而U-boot相对于SoC显得像庞然大物，所以中间也有很多过渡阶段。
 这个过程被称为两步加载，甚至有三步加载(先拉起TPL/SPL，再由他们拉起更大的启动程序)。好消息是我们不用管这些，U-boot二进制程序里面包括第二步和第三步加载，直接把整个二进制文件刷到从64个扇区起的位置就可以了。
 
 ```dd if=u-boot-rockchip.bin of=/dev/sdX seek=64 conv=notrunc```
@@ -96,16 +97,16 @@ rating: 1
 
 ```bash 
     # 为了简单，只分一个区
-    parted /dev/sdX makpart '' ext4 32768s -1s
+    parted /dev/sdX mkpart '' ext4 32768s -1s
     # 选择ext4文件系统
-    mkfs.ext4 /dev/sdXp1
+    mkfs.ext4 /dev/sdX1
     # 挂载分区
-    mount /dev/sdXp1 /mnt
+    mount /dev/sdX1 /mnt
     # 下载和解压 Arch Rootfs
     wget http://os.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz
     bsdtar -xpf ArchLinuxARM-aarch64-latest.tar.gz -C /mnt
 ```
-接下来，Archwiki上我们下载一个Boot.scr的脚本，放在/boot文件下面。这个文件是连接U-boot 和Linux操作系统的关键步骤。
+接下来，从Archwiki上下载一个boot.scr脚本，放在/boot文件夹下面。这个文件是连接U-boot 和Linux操作系统的关键步骤。
 我们编译的U-boot里面有个配置参数CONFIG_DISTRO_DEFAULTS，如果允许它，Uboot会扫描可启动的磁盘里面的boot.scr或者extlinux.conf文件，然后执行这些文件。
 一个extlinux.conf 文件看起来是这样：
 
@@ -147,7 +148,7 @@ label Arch with uart devicetree overlay
 2. dtb文件也需要修改成合适的，反正Arch提供的dtb文件在我这里没有一个能用的,需要自己编译内核和dtbs。
    
 不用担心，只要知道这个文件的作用，我们完全可以自己写这个脚本。
-我的boot.cmd脚本差不都是这样：
+我的boot.cmd脚本差不多是这样：
 ```
 load ${devtype} ${devnum}:${distro_bootpart} ${ramdisk_addr_r} ${prefix}uInitrd
 load ${devtype} ${devnum}:${distro_bootpart} ${kernel_addr_r} ${prefix}Image
@@ -161,14 +162,14 @@ booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}
 
 ``` 
     # 输入路径跟脚本中的地址对应
-    mkimage -A arm -O linux -T ramdisk -C none -n "Initrd Image" -d /mnt/boot/initramfs-linux.img /mnt/boot/uInitrd;
-    mkimage -A arm -O linux -T script -C none -n "Boot Script" -d boot.cmd /mnt/boot/boot.scr
+    mkimage -A arm64 -O linux -T ramdisk -C none -n "Initrd Image" -d /mnt/boot/initramfs-linux.img /mnt/boot/uInitrd;
+    mkimage -A arm64 -O linux -T script -C none -n "Boot Script" -d boot.cmd /mnt/boot/boot.scr
 ```
 想了解这个命令可以上网查询，这里就不详细介绍了。
 到了这一步我们有了U-boot作为启动加载程序，就基本完成了，然后插电看看是不是已经搞定了。
 
-#### 必坑指南
-通过USB-TTL模块查看启动日志。我没有这个模块，如果指示灯不显示好了，我也不知道问题出在那个环节，浪费了很多时间。
+#### 避坑指南
+通过USB-TTL模块查看启动日志。我没有这个模块，只能看指示灯，出了问题也不知道出在哪个环节，浪费了很多时间。
 
 现在想来最好从Armbian这个项目下载一个能用的系统, 测试Uboot和boot.scr或者extlinux.conf能不能工作，最后再刷入Arch的文件系统了。
 

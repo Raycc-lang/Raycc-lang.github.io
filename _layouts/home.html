@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{{ site.title | default: "Ray's Blog" }}</title>
+{% seo %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap" rel="stylesheet">
@@ -285,6 +285,7 @@
   {% include head-custom.html %}
 </head>
 <body>
+{% assign featured_post = site.posts | where_exp: "p", "p.path contains 'htdp1'" | first %}
 
 <header>
   <div class="inner">
@@ -325,14 +326,14 @@
       <div class="features">
         <article class="feature">
           <div class="tag">/ ARTICLE</div>
-          <h3><a href="{{ '/jekyll/update/2025/03/05/htdp1.html' | relative_url }}">What Is a Computer Program? How to Write One?</a></h3>
+          <h3><a href="{{ featured_post.url | relative_url }}">What Is a Computer Program? How to Write One?</a></h3>
           <p>If you've ever wondered what exactly you're "programming," this article reveals the thought process from real-world problems to code.</p>
-          <a class="read" href="{{ '/jekyll/update/2025/03/05/htdp1.html' | relative_url }}">Read article</a>
+          <a class="read" href="{{ featured_post.url | relative_url }}">Read article</a>
         </article>
 
         <article class="feature">
           <div class="tag">// SERIES</div>
-          <h3><a href="{{ '/series/the-tiny-learner/' | relative_url }}">Deep Learning Fundamentals</a></h3>
+          <h3><a href="{{ '/series/the-tiny-learner/' | relative_url }}">The Tiny Learner: Deep Learning from Scratch</a></h3>
           <p>AI is everywhere, yet its underlying technology is rarely discussed or often deemed too esoteric. This series offers a path to understanding that doesn't require deep mathematical background.</p>
           <a class="read" href="{{ '/series/the-tiny-learner/' | relative_url }}">Browse series</a>
         </article>
@@ -385,14 +386,14 @@
       <div class="features">
         <article class="feature">
           <div class="tag">/ 文章</div>
-          <h3><a href="{{ '/jekyll/update/2025/03/05/htdp1.html' | relative_url }}">什么是计算机程序？如何写一个程序？</a></h3>
+          <h3><a href="{{ featured_post.url | relative_url }}">什么是计算机程序？如何写一个程序？</a></h3>
           <p>如果你曾疑惑编程到底在"编"什么，这篇文章将为你揭示从现实问题到代码的思维过程。</p>
-          <a class="read" href="{{ '/jekyll/update/2025/03/05/htdp1.html' | relative_url }}">阅读文章</a>
+          <a class="read" href="{{ featured_post.url | relative_url }}">阅读文章</a>
         </article>
 
         <article class="feature">
           <div class="tag">// 系列</div>
-          <h3><a href="{{ '/series/the-tiny-learner/' | relative_url }}">深度学习基础</a></h3>
+          <h3><a href="{{ '/series/the-tiny-learner/' | relative_url }}">零基础深度学习（The Tiny Learner）</a></h3>
           <p>到处都能听到 AI，但其底层技术却鲜被提及，或被认为太过深奥。这个系列提供了不需要深厚数学基础的理解路径。</p>
           <a class="read" href="{{ '/series/the-tiny-learner/' | relative_url }}">浏览系列</a>
         </article>

@@ -2,6 +2,7 @@
 layout: default
 series_title: "零基础深度学习：The Little Learner代码实践"
 title:  "(四) 优化器"
+description: "《The Little Learner》系列第四篇，从随机梯度下降出发，逐步实现动量、RMSProp与Adam四种优化器"
 date:   2025-06-19 10:11:01 +0800
 categories: jekyll update
 rating: 2
@@ -128,10 +129,10 @@ def gradient_descent_builder(
             return next_inflated_theta
 
         # 调用修订函数进行多次迭代更新
-        training_history = revise(revision_step, hyper.revs, initial_inflated_theta)
+        final_inflated_theta = revise(revision_step, hyper.revs, initial_inflated_theta)
 
-        # 对训练历史中的参数进行解包装并返回
-        return [[deflate(p) for p in i_theta] for i_theta in training_history]
+        # 对最终参数进行解包装并返回
+        return [deflate(p) for p in final_inflated_theta]
 
     # 返回一个根据给定的包装、解包装和更新函数构建的优化器函数
     return optimizer
@@ -151,7 +152,7 @@ def naked_u(p: Tensor, g: Tensor, hyper: GDConfig):
     return tsub(p, tmul(g, hyper.lr))
 
 # 构建基础优化器
-naked_gd = gradient_descent_builder(named_i, named_d, named_u)
+naked_gd = gradient_descent_builder(naked_i, naked_d, naked_u)
 ```
 
 ### 动量 (Momentum)
@@ -169,6 +170,7 @@ naked_gd = gradient_descent_builder(named_i, named_d, named_u)
 
 ```python
 from collections import namedtuple
+from dataclasses import dataclass
 
 VelocityP = namedtuple("VelocityP", ["parameter", "velocity"])
 
@@ -198,7 +200,7 @@ mgd = gradient_descent_builder(velocity_i, velocity_d, velocity_u)
 ```
 
 #### 动量公式解释
-如果你没有看明白动量更新规则，使用一点简单的加法交换律和结合率会让事情变得更容易：
+如果你没有看明白动量更新规则，使用一点简单的加法交换律和结合律会让事情变得更容易：
 
 $$
 v = μ \cdot v_\text{old}  - \alpha \cdot \nabla J(\theta_{\text{old}})
@@ -210,17 +212,14 @@ $$
 \theta_{\text{new}} = \theta_{\text{old}} - \alpha \cdot \nabla J(\theta_{\text{old}}) + μ \cdot v_\text{old}
 $$  
 
-最后这个公式的前一部分就是我们已经非常熟悉的梯度下降更新公式，后面加上了$ μ \cdot v_\text{old}$。在这个公式中$ v_\text{old}$代表的是历史累计的梯度，只要方向一致，它就会越来越大，像雪球滚下山；一旦方向反了，它就会慢慢刹车甚至掉头。其中$\mu$在代码中是momentum的常数变量，这个超参数决定了$v_\text{old}$历史梯度或者Velocity的权重或者说占比。$\beta = 0$的时候就变成了传统的SGD或者基础版的梯度下降；μ 越接近 1，雪球越重，下坡越快。
+最后这个公式的前一部分就是我们已经非常熟悉的梯度下降更新公式，后面加上了$ μ \cdot v_\text{old}$。在这个公式中$ v_\text{old}$代表的是历史累计的梯度，只要方向一致，它就会越来越大，像雪球滚下山；一旦方向反了，它就会慢慢刹车甚至掉头。其中$\mu$在代码中是momentum的常数变量，这个超参数决定了$v_\text{old}$历史梯度或者Velocity的权重或者说占比。$\mu = 0$的时候就变成了传统的SGD或者基础版的梯度下降；μ 越接近 1，雪球越重，下坡越快。
 
 其实这是一个简化版的动量更新公式，还有另一个动量公式：
-$$v_\text{t}
-​
- =μ
- v_\text{t−1}
-​
- +(1−μ )\alpha∇ ​
- J(θ) 
-2$$
+
+$$v_\text{t} = μ \cdot v_\text{t−1} + (1−μ) \cdot \nabla J(\theta)$$
+
+$$\theta_\text{t} = \theta_\text{t−1} - \alpha \cdot v_\text{t}$$
+
 通过这个公式更能清晰地看出超参数$\mu$的作用。这两个公式是等价的，区别仅在于是否将学习率$\alpha$包含在动量项中。这种方法省一次乘法，在代码实现中更常见。
 
 
@@ -258,13 +257,13 @@ def rms_d(rms_p: RmsP) -> P:
     return rms_p.parameter
 
 def smooth(decay: float, average: Tensor, g: Tensor) -> Tensor:
-    """计算指数移动平均：new_avg = β·old_avg + (1-β)·g²"""
+    """计算指数移动平均：new_avg = β·old_avg + (1-β)·g（RMSProp调用时传入的g是梯度的平方）"""
     return tadd(tmul(decay, average), tmul(1 - decay, g))
 
 def rms_u(rms_p: RmsP, g: Tensor, h: RMSPropConfig) -> RmsP:
     """RMSProp更新规则：
     1. 更新移动平均: r = β·r_old + (1-β)·(g⊙g)
-    2. 计算自适应学习率: lr_eff = α / (√r)+ ε
+    2. 计算自适应学习率: lr_eff = α / (√r + ε)
     3. 更新参数: θ = θ - lr_eff·g
     """
     r = smooth(h.decay, rms_p.running_avg, tsqr(g))
@@ -276,11 +275,11 @@ def rms_u(rms_p: RmsP, g: Tensor, h: RMSPropConfig) -> RmsP:
 #### 理解RMSProp公式
 RMSProp的更新规则分为两步：
 
-$$r_\text{t} =βr_\text{t−1}+(1−β)∇θJ(θ)^2$$
+$$r_\text{t} =βr_\text{t−1}+(1−β)(∇J(θ))^2$$
 
-$$θ_\text{t}=θ_\text{t−1}−\frac{α}{\sqrt{r_\text{t}}+ϵ} ∇J(θ)v t$$
+$$θ_\text{t}=θ_\text{t−1}−\frac{α}{\sqrt{r_\text{t}}+ϵ} ∇J(θ)$$
 
-要理解这两个公式还是先从我们熟悉的梯度更新入手。首先我们需要动态的学习率，这点很容易——只需要给学习率乘以一个变量就好了；然后我们需要这个变量在梯度值大的时候它的值比较小，在梯度小的时候，它的值比较大，这点用倒数实现，这个变量值越大，它的倒数值就越小；这也引出一个问题，这个变量的值可能为0，分数分母如果等于0，则表达式无意义，因此加上一个很小的常数ϵ以避免除零错误。以上就是公式中的$\frac{α}{\sqrt{r_\text{t}+ϵ}}$的由来。这个公式作为新的学习率，在代码中体现为`newlr`变量。
+要理解这两个公式还是先从我们熟悉的梯度更新入手。首先我们需要动态的学习率，这点很容易——只需要给学习率乘以一个变量就好了；然后我们需要这个变量在梯度值大的时候它的值比较小，在梯度小的时候，它的值比较大，这点用倒数实现，这个变量值越大，它的倒数值就越小；这也引出一个问题，这个变量的值可能为0，分数分母如果等于0，则表达式无意义，因此加上一个很小的常数ϵ以避免除零错误。以上就是公式中的$\frac{α}{\sqrt{r_\text{t}}+ϵ}$的由来。这个公式作为新的学习率，在代码中体现为`new_lr`变量。
 
 接下来是$\sqrt{r}$的来历：它的值应该反映梯度的大小，但是不能直接使用梯度，因为$\frac{\alpha}{g} \cdot g = \alpha$，这样的话就等于失去了梯度信息。所以我们用和上文中求动量中几乎一样的方法(smooth函数)求出梯度平方的指数移动平均，目的也相同——加权平均既保留了“陡峭”信号，又滤掉了单步噪声。超参数β是衰减率（通常取0.9），控制历史梯度平方的权重。跟动量法的$\mu$作用一样，却并不是同一个超参数。有的框架（比如pytorch）把它们叫做β1和β2加以区分。跟之前L2loss一样，这里也使用平方消除方向，不过为了使得参数更新量跟梯度保持一致，再用平方根数值变回之前的量级。
 
@@ -302,8 +301,8 @@ $$θ_\text{t}=θ_\text{t−1}−\frac{α}{\sqrt{r_\text{t}}+ϵ} ∇J(θ)v t$$
 ```python
 @dataclass(frozen=True)
 class AdamConfig(GDConfig):
-    decay: float = 0.9      # 二阶矩衰减率β₂
-    momentum: float = 0.85  # 一阶矩衰减率β₁
+    decay: float = 0.999    # 二阶矩衰减率β₂
+    momentum: float = 0.9   # 一阶矩衰减率β₁
     eps: float = 1e-8       # 数值稳定常数
 
 # 定义参数结构：参数+动量+自适应项
@@ -333,7 +332,7 @@ def adam_u(adam_p: AdamP, g: Tensor, h: AdamConfig) -> AdamP:
 # 构建Adam优化器
 adam_gd = gradient_descent_builder(adam_i, adam_d, adam_u)
 ```
-因为结合和RMSProp和动量法的思想，所以adam继承了双方的优点，在各种不同的问题和模型上都表现良好。可视化的结果看起来和RMSProp没什么区别，但是收敛速度更快，不过不如动量法快。
+因为结合了RMSProp和动量法的思想，所以Adam继承了双方的优点，在各种不同的问题和模型上都表现良好。可视化的结果看起来和RMSProp没什么区别，但是收敛速度更快，不过不如动量法快。
 
 由于其诸多优点，还有其超参数默认值(β1=0.9, β2=0.999)适用大多数场景，Adam及其变体(AdamW, Nadam)已成为大多数深度学习任务的默认优化器。
 

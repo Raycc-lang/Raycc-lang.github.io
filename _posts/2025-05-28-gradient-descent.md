@@ -2,6 +2,7 @@
 layout: default
 series_title: "零基础深度学习：The Little Learner代码实践"
 title:  "(二)梯度下降"
+description: "《The Little Learner》系列第二篇，讲解梯度的数学意义与学习率的作用，并用Python从零实现梯度下降算法"
 date:   2025-05-25 22:29:22 +0800
 categories: jekyll update
 rating: 2
@@ -13,7 +14,7 @@ rating: 2
 
 本文的内容紧接上一篇遗留的问题——在上一篇文章中，我们定义了最基础的线性模型，目标函数以及用于参数更新的辅助函数，但尚未实现有效的优化算法。 
 
-本文将从目标函数曲线切入，逐步介绍机器学习最核心的优化算法——**梯度下降法**。有了有效的优化算法，便可以让计算机自己完成整个学习过程。 为测试算法通用性，我们将引入的更多模型，并可能发现值得探索的新问题。
+本文将从目标函数曲线切入，逐步介绍机器学习最核心的优化算法——**梯度下降法**。有了有效的优化算法，便可以让计算机自己完成整个学习过程。 为测试算法通用性，我们将引入更多模型，并可能发现值得探索的新问题。
 
 本文延续使用上篇定义的line、l2_loss和revise等函数，理解这些函数的作用和内部结构是掌握本文以及后续内容的基础，因此如果你还没有读过本系列上一篇文章的话，建议优先阅读。
 #### 梯度的数学意义与计算
@@ -47,16 +48,16 @@ $$
 # 函数名叫做nabla，因为del是python里的关键字
 
 def nabla_single(objective_func: Callable[[List[float]], float],
-          theta: float,
+          theta: List[float],
           delta: float = 1e-6) -> float:
 
     current_loss = objective_func(theta)
     theta[0] = theta[0] + delta
-    perturbed_loss = objective_func(perturbed_theta)
+    perturbed_loss = objective_func(theta)
     gradient = (perturbed_loss - current_loss) / delta
     return gradient
 ```
-参数delta参数代表微增量，这个方法通过微小的参数扰动近似导数，类似于斜率公式 $(y2-y1)/(x2-x1)$。但 delta 太大会不精确，太小可能因浮点误差失真，通常取 1e-6。这种求导数的方法被称为数值微分。
+参数delta代表微增量，这个方法通过微小的参数扰动近似导数，类似于斜率公式 $(y2-y1)/(x2-x1)$。但 delta 太大会不精确，太小可能因浮点误差失真，通常取 1e-6。这种求导数的方法被称为数值微分。
 
 不过这个函数只能处理单个参数的情况，而我们需要一个更通用的梯度计算函数，能够接受任意数量的参数。
 ```python
@@ -97,20 +98,20 @@ def nabla(objective_func: Callable[[List[float]], float],
 theta = [0.0, 0.0]
 
 # 计算梯度
-grad = nabla(objective_func, theta)  # 假设返回[-62.63, -12.4]
+grad = nabla(line_objective, theta)  # 大约返回[-63.0, -21.0]
 
 # 直接使用梯度更新
-theta_new = [theta[0] - grad[0], theta[1] - grad[1]]  # [62.63, 12.4]
+theta_new = [theta[0] - grad[0], theta[1] - grad[1]]  # [63.0, 21.0]
 
 # 得出损失
 print(line_objective(theta_new))
 ```
-这个参数的出来的损失高达$113,763.027$！这就像从山坡上跳向谷底，结果飞过了整个山谷，并且冲上了天空。
+这个参数得出来的损失高达$142,917$！这就像从山坡上跳向谷底，结果飞过了整个山谷，并且冲上了天空。
 
 
 为了解决这个问题，我们用一个小常数(通常$0.001-0.1$)乘以梯度，来控制更新步伐。 这个小的常数叫做**学习率(Learning Rate)**，用希腊字母$\alpha$表示。
 
-下面的例子中会让学习率等于0.01。引入变化率会使每次参数的更新量很小，但是确保了损失在稳步下降。
+下面的例子中会让学习率等于0.01。引入学习率会使每次参数的更新量很小，但是确保了损失在稳步下降。
 
 学习率本身不是模型参数，但对参数优化过程至关重要。此类不通过数据学习而需人工设定的配置的变量被称为**超参数(hyperparameter)**。其实此前我们已接触过另一个超参数——`revise`函数中的迭代次数。
 
@@ -140,7 +141,7 @@ def update_v1(theta: List[float]) -> List[float]:
 测试一下这个更新函数好不好用：
 ```python
 
-theta_history = revise(update_v1), 1000, initial_theta)
+theta = revise(update_v1, 1000, initial_theta)
 ```
 得到的结果是[1.0499806157842302, 6.016510481423397e-05]这跟我们之前预测非常接近，画图来看几乎看不出区别。
 从目标函数值的变化率也可以看出来，损失在逐渐接近0。
@@ -168,7 +169,7 @@ def gradient_descent(objective_func: Callable[[List[float]], float],
     return revise(update, num_revisions, initial_theta)
 
 ```
-首先复制之前的update_v1……不过它在gradient_descent函数内部，这意味这它是一个闭包结构：它访问函数内部的目标函数，而不是全局作用域的。最后调用`revise`函数来更新参数。
+首先复制之前的update_v1……不过它在gradient_descent函数内部，这意味着它是一个闭包结构：它访问函数内部的目标函数，而不是全局作用域的。最后调用`revise`函数来更新参数。
 
 为验证梯度下降的泛化能力，我们尝试二次函数拟合任务。
 
@@ -197,13 +198,13 @@ optimized_quad_theta = gradient_descent(
     initial_theta=initial_quad_theta,
     learning_rate=0.001,  
     num_revisions=1000   
-)[-1]
+)
 
 print(f"二次函数参数: a={optimized_quad_theta[0]:.4f}, b={optimized_quad_theta[1]:.4f}, c={optimized_quad_theta[2]:.4f}")
 ```
 输出示例：
-二次函数参数: `二次函数参数: a=1.4787, b=0.9929, c=2.0546`
-可是化数据和训练结果：
+`二次函数参数: a=1.4787, b=0.9929, c=2.0546`
+可视化数据和训练结果：
 ![二次函数训练结果](/assets/images/quadratic.png)
 
 
@@ -225,7 +226,7 @@ def plane(xs: Iterable[Iterable[float]]) -> Callable[[Iterable[float], float], L
 
 # 新的数据集
 plane_xs = [(1.0, 2.0), (2.0, 3.0), (3.0, 4.0), (4.0, 5.0)]
-plane_ys = [1.0 * x[0] + 0. 5 * x[1] + 0.1 for x in plane_xs]
+plane_ys = [1.0 * x[0] + 0.5 * x[1] + 0.1 for x in plane_xs]
 
 # 初始参数 (w1, w2, b)
 initial_plane_theta = [[0.0, 0.0], 0.0]

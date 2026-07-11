@@ -1,9 +1,12 @@
 ---
 layout: default
 title:  "什么是路由器？如何设置Archlinux作为软路由?"
+description: "使用systemd-networkd配置网络接口，并通过IPMasquerade与nftables实现Arch Linux软路由的NAT转发"
 date:   2025-02-25 00:13:22 +0800
 rating: 1
 categories: jekyll update
+redirect_from:
+  - /jekyll/update/2025/02/25/set-arch-into-router.md.html
 ---
 
 
@@ -79,7 +82,7 @@ Name=ext
 局域网接口配置文件：
 ```
 [Match]
-Name=in
+Name=int
 
 [Network]
 Address=10.0.0.1/24
@@ -98,7 +101,7 @@ DNS=1.1.1.1
 互联网接口配置文件：
 ```
 [Match]
-Name=out
+Name=ext
 
 [Network]
 DHCP=yes
@@ -109,17 +112,17 @@ IPv6PrivacyExtensions=true
 ```
 命名为20-int.network 和20-ext.network，放到/etc/systemd/network/文件夹下。
 
-配置文件的内容分为几个部分，Match部分选择我们上面设置的接口名称。也可以通过Mac地址匹配。在Network部分指定网络地址，HDCP或者其他的服务。最后在对应的部分对该服务进行进一步的配置。
+配置文件的内容分为几个部分，Match部分选择我们上面设置的接口名称。也可以通过Mac地址匹配。在Network部分指定网络地址，DHCP或者其他的服务。最后在对应的部分对该服务进行进一步的配置。
 
 其他网络管理软件的配置方法可参考下文参考链接Archwiki关于router的相关部分。
 
-##### Masquerding
+##### Masquerading
 
-配置好两个接口之后还要开启内核转发功能，才能让数据包数据包通过不同的接口。在上面systemd-networkd的配置文件中有两个字段```"IPv4Forwarding=yes"```和 ```"IPv6Forwarding=yes"```,表示已经包括了允许内核转发数据包。
+配置好两个接口之后还要开启内核转发功能，才能让数据包通过不同的接口。在上面systemd-networkd的配置文件中有两个字段```"IPv4Forwarding=yes"```和 ```"IPv6Forwarding=yes"```,表示已经包括了允许内核转发数据包。
 
-不过之开启转发功能还是不足以让局域网的设备连接上互联网，原因是局域网上的地址不会在互联网上传输。就算我们转发了网络请求，也还是会被的运营商的路由器丢弃。所以我们需要上面提到的Masquerading功能。
+不过只开启转发功能还是不足以让局域网的设备连接上互联网，原因是局域网上的地址不会在互联网上传输。就算我们转发了网络请求，也还是会被运营商的路由器丢弃。所以我们需要上面提到的Masquerading功能。
 
-开启masqurading的方法非常简单，只需要在局域网的接口配置文件上加上正确地配置```"IPMasquerade="```。这个字段的默认参数是"no",只要改成"ipv4", "ipv6"或者"both"就可以了。
+开启Masquerading的方法非常简单，只需要在局域网的接口配置文件上加上正确地配置```"IPMasquerade="```。这个字段的默认参数是"no",只要改成"ipv4", "ipv6"或者"both"就可以了。
 
 一旦开启了这个选项，甚至不需要显式开启IPv4Forwarding和IPv6Forwarding，而且会自动配置Nftables或者Iptables。
 
@@ -135,7 +138,7 @@ table inet nat {
   }
 }
 ```
-可以看到自己实现也非常简单。只需注意Masqurading必要在postrouting这个钩子上指定，在匹配到需要操作的数据之后写上masqurade这个关键字就可以了。用```nft -f加载这个配置后就完成配置了。
+可以看到自己实现也非常简单。只需注意Masquerading必须在postrouting这个钩子上指定，在匹配到需要操作的数据之后写上masquerade这个关键字就可以了。用`nft -f`加载这个配置后就完成配置了。
 
 当然到了这一步，你可能还是不太理解这个关键字干了什么，其实我们还可以换一个写法，写成```"iif int oif ext snat to ‘extIP’"```。意思是在Postrouting这个阶段，找出从局域网发出，去往互联网的数据包，把数据包的源地址改掉--从局域网地址改成有互联网连接的接口绑定的IP地址。
 

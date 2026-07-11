@@ -5,6 +5,7 @@
   <meta charset='utf-8'>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  {% seo %}
   <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}"
     media="screen" type="text/css">
   <link rel="stylesheet" href="{{ '/assets/css/print.css' | relative_url }}" media="print" type="text/css">
@@ -51,6 +52,52 @@
         {% endif %}
 
         {{ content }}
+
+        {% if page.series_title %}
+          {% comment %} Resolve the specific series index page generically; fall back to /series/. {% endcomment %}
+          {% assign series_page = site.pages | where: 'series_title', page.series_title | first %}
+          {% if series_page %}
+            {% assign series_url = series_page.url %}
+          {% else %}
+            {% assign series_url = '/series/' %}
+          {% endif %}
+
+          {% comment %} Posts in this series, oldest first, to compute prev/next. {% endcomment %}
+          {% assign series_posts = site.posts | where: 'series_title', page.series_title | sort: 'date' %}
+          {% assign prev_post = nil %}
+          {% assign next_post = nil %}
+          {% assign found_current = false %}
+          {% for sp in series_posts %}
+            {% if found_current and next_post == nil %}
+              {% assign next_post = sp %}
+            {% endif %}
+            {% if sp.url == page.url %}
+              {% assign found_current = true %}
+            {% endif %}
+            {% unless found_current %}
+              {% assign prev_post = sp %}
+            {% endunless %}
+          {% endfor %}
+
+          <nav class="series-nav" style="margin-top: 2.5em; padding: 1em 1.2em; border: 1px solid #e0e4ea; border-radius: 4px; background: #fafafa;">
+            <div style="color: #666; margin-bottom: 0.6em;">
+              本文属于系列
+              <a href="{{ series_url | relative_url }}">{{ page.series_title }}</a>
+            </div>
+            <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.8em;">
+              <div>
+                {% if prev_post %}
+                  上一篇: <a href="{{ prev_post.url | relative_url }}">{{ prev_post.title | escape }}</a>
+                {% endif %}
+              </div>
+              <div>
+                {% if next_post %}
+                  下一篇: <a href="{{ next_post.url | relative_url }}">{{ next_post.title | escape }}</a>
+                {% endif %}
+              </div>
+            </div>
+          </nav>
+        {% endif %}
       </section>
 
       <aside id="sidebar">

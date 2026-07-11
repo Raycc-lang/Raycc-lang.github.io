@@ -1,6 +1,7 @@
 ---
 layout: default
 title:  "什么是尾递归优化? 如何把递归转化成迭代？"
+description: "讲解递归与尾递归优化的本质，并演示如何用显式栈把二叉树中序遍历等递归写法改写成迭代"
 date:   2025-04-23 17:30:42 +0800
 categories: jekyll update
 ---
@@ -60,7 +61,7 @@ def fact_iter(n, acc=1):
 ```
 它的求值过程：
 ```python
-fac_iter(5)
+fact_iter(5)
 = fact_iter(5, 1)
 = fact_iter(4, 5)
 = fact_iter(3, 20)
@@ -68,7 +69,7 @@ fac_iter(5)
 = fact_iter(1, 120)
 = 120
 ```
-在上面这个示例中，函数内部调用了一个内部函数。带入5，实际上是求fact_iter(5, 1)，得到fact_irter(5 - 1, 5 * 1)，首先会求出两个参数的值，再得到fact_iter(4, 5)...... 可以看到这个这并不是一个先扩张后收缩的过程，而是用固定数量的状态变量来存储中间状态，这种过程我们称为线性迭代过程。
+在上面这个示例中，函数内部同样调用了自身。带入5，实际上是求fact_iter(5, 1)，得到fact_iter(5 - 1, 5 * 1)，首先会求出两个参数的值，再得到fact_iter(4, 5)...... 可以看到这个这并不是一个先扩张后收缩的过程，而是用固定数量的状态变量来存储中间状态，这种过程我们称为线性迭代过程。
 
 是的，你没看错！上面这个函数是一个递归函数，这个递归函数求值的过程却是一个线性迭代过程。
 
@@ -98,17 +99,17 @@ def foo(data):
 
 常常可以看到scheme的使用者，在函数定义子函数，然后调用子函数作为返回值。然而在Python以下写法会导致额外一层堆栈调用：
 ```python
-def factorial(n)
+def factorial(n):
     def inner_fact_iter(n, acc):
         if n == 1:
             return acc
         else:
-            return fact_iter(n - 1, n * acc)
+            return inner_fact_iter(n - 1, n * acc)
     
     return inner_fact_iter(n, 1)
 ```
 
-并且Python的作者吉多·范罗苏姆（Guido van Rossum）在[博客](https://neopythonic.blogspot.com/2009/04/tail-recursion-elimination.html)中明确表示不会在pythong中实现尾递归优化，理由有三：
+并且Python的作者吉多·范罗苏姆（Guido van Rossum）在[博客](https://neopythonic.blogspot.com/2009/04/tail-recursion-elimination.html)中明确表示不会在Python中实现尾递归优化，理由有三：
 
 1. 实现尾递归优化以后，会破坏堆栈跟踪（Stack Trace）的完整性，增加调试难度。
 2. Python的‘最小惊奇原则’要求代码行为可预测——若某解释器实现TCO而另一实现不支持，同一递归代码在不同环境下可能表现迥异，这与Python的‘唯一明确方式’哲学冲突。
@@ -195,3 +196,8 @@ assert flatten_iterative(tree5) == [1,2,5,7,9]
 4. 转向: current=1.right=None → 弹出2 → result=[1,2]
 5. 转向: current=2.right=7 → 压入7 → 转向左节点5......
 
+后续步骤依此类推：不断深入左子树并压栈，走到头就弹出、记录、转向右子树，直到栈空且没有待处理的节点，最终得到 [1,2,5,7,9]。
+
+#### 总结
+
+回顾一下本文的内容：递归是函数调用自身，但递归函数的求值过程未必是递归过程——尾递归形式的函数，其求值过程实际上是线性迭代；尾递归优化能让这类函数以常量的栈空间运行，但Python出于调试和一致性等考虑明确不做这项优化；因此在Python中，简单的尾递归（如阶乘）可以直接改写成循环加状态变量，而天然递归的结构（如树的遍历）改写成迭代时，则需要用显式的栈来模拟调用栈。理解了这层对应关系，你就可以在"表达清晰"和"资源可控"之间自由选择了。

@@ -1,5 +1,7 @@
 _site
 .sass-cache
+# Private planning workspace — never push to GitHub
+_planning/
 .jekyll-cache
 .jekyll-metadata
 vendor
