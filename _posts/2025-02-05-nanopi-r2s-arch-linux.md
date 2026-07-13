@@ -45,6 +45,8 @@ rating: 1
 
 #### 实战部署流程
 
+部署一共四件事：编译 U-Boot → 把它刷到磁盘的固定位置 → 分区并解压根文件系统 → 用 boot.scr 打通 U-Boot 和内核。对照上一节的三个阶段：前两件事解决"引导加载"（阶段2），后两件事解决"内核加载"（阶段3）；至于阶段1的 BootROM，它烧死在芯片里，我们管不着也不用管。
+
 参考[FriendlyElec Wiki](https://wiki.friendlyelec.com/wiki/index.php/NanoPi_R2S/zh#.E5.A6.82.E4.BD.95.E7.BC.96.E8.AF.91.E7.B3.BB.E7.BB.9F)配置交叉编译环境：
 ```bash
     # 安装友善提供的交叉编译器
@@ -90,6 +92,8 @@ rating: 1
 这个过程被称为两步加载，甚至有三步加载(先拉起TPL/SPL，再由他们拉起更大的启动程序)。好消息是我们不用管这些，U-boot二进制程序里面包括第二步和第三步加载，直接把整个二进制文件刷到从64个扇区起的位置就可以了。
 
 ```dd if=u-boot-rockchip.bin of=/dev/sdX seek=64 conv=notrunc```
+
+为什么偏偏是第 64 个扇区？回看上面那张分区标准表：二级引导的磁盘位置写的是 0x40，换算成十进制正好是 64——`seek=64` 就是从那张表里抄来的。BootROM 不认识分区表和文件系统，它只会到这个约定死的位置去读，所以这个数字一个都不能错。
 
 如果不行的话，就需要分别制作TPL/SPL，Uboot和Trust的镜像，然后分别刷到第64，16384，24576扇区了,参考Uboot[文档](https://docs.u-boot.org/en/latest/board/rockchip/rockchip.html#package-the-image-with-rockchip-miniloader)。 
 
@@ -165,7 +169,7 @@ booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}
     mkimage -A arm64 -O linux -T ramdisk -C none -n "Initrd Image" -d /mnt/boot/initramfs-linux.img /mnt/boot/uInitrd;
     mkimage -A arm64 -O linux -T script -C none -n "Boot Script" -d boot.cmd /mnt/boot/boot.scr
 ```
-想了解这个命令可以上网查询，这里就不详细介绍了。
+mkimage 做的事情很简单：给文件包上一个 U-Boot 能识别的头部，里面记录着类型、架构和校验和。这样 U-Boot 加载 uInitrd 和 boot.scr 的时候，才知道自己拿到的是什么东西、有没有损坏——这也回答了前面遗留的问题：为什么 Arch 提供的 initramfs 不能直接用，因为它缺的就是这个头。
 到了这一步我们有了U-boot作为启动加载程序，就基本完成了，然后插电看看是不是已经搞定了。
 
 #### 避坑指南
