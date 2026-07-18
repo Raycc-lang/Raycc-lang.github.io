@@ -38,7 +38,7 @@ rating: 1
 |------|------|-----
 |U-Boot |	二级引导程序 |	交叉编译或预编译二进制
 |Linux内核	| 系统核心	| 官方仓库或自定义编译
-|设备树(Device Tree)	|硬件描述文件	|厂商SDK提供
+|设备树(Device Tree)	|硬件描述文件	|厂商SDK提供或自行编译
 |initramfs	| 临时根文件系统 | Arch Linux ARM官方镜像
 |rootfs	|根文件系统	|Arch Linux ARM官方镜像
 
@@ -50,6 +50,7 @@ rating: 1
 参考[FriendlyElec Wiki](https://wiki.friendlyelec.com/wiki/index.php/NanoPi_R2S/zh#.E5.A6.82.E4.BD.95.E7.BC.96.E8.AF.91.E7.B3.BB.E7.BB.9F)配置交叉编译环境：
 ```bash
     # 安装友善提供的交叉编译器
+    # 注意：这是 HTTP 明文 + 裸 IP 链接，建议先 curl 下载脚本审查后再用 sudo 执行
     sudo bash -c \
   "$(curl -fsSL http://112.124.9.243:3000/friendlyelec/build-env-on-ubuntu-bionic/raw/branch/cn/install.sh)"
     #配置环境
@@ -148,8 +149,8 @@ label Arch with uart devicetree overlay
 	"kernel_addr_r=0x02080000\0"	\
 ```
 我们下载的这个boot.scr脚本没办法直接使用，反正我这里行不通，至少存在以下几个问题：
-1. Arch提供的initramfs镜像不能直接加载，需要编译成U-boot可以加载的形式。
-2. dtb文件也需要修改成合适的，反正Arch提供的dtb文件在我这里没有一个能用的,需要自己编译内核和dtbs。
+1. Arch提供的initramfs是裸镜像。裸 initrd 不是不能加载，而是要在 `booti` 行显式给出大小（写成 `${ramdisk_addr_r}:${filesize}`，就像上面 Armbian 脚本那样）；如果不想在 booti 行带 `:size`，就得用 mkimage 套个头，让 U-Boot 自己从头部读出大小。这里选择后者。
+2. dtb 文件也得换成能用的。NanoPi R2 有多个修订版（rev00、rev01 等），硬件略有差异，对应的 dtb 也不同；不同来源的内核文件名还不一样--主线 Linux 用 `rk3328-nanopi-r2s.dtb`，友善 BSP 树用 `rk3328-nanopi-r2-rev00.dtb` 这类名字。Arch 预编译的 dtb 在我这里没一个能用，最后是自己编译内核和 dtbs 才解决。所以下面 boot.cmd 里的文件名只是我那次能跑通的那个，照抄前请先确认你手上的 dtb 实际叫什么。
    
 不用担心，只要知道这个文件的作用，我们完全可以自己写这个脚本。
 我的boot.cmd脚本差不多是这样：
@@ -157,6 +158,7 @@ label Arch with uart devicetree overlay
 load ${devtype} ${devnum}:${distro_bootpart} ${ramdisk_addr_r} ${prefix}uInitrd
 load ${devtype} ${devnum}:${distro_bootpart} ${kernel_addr_r} ${prefix}Image
 
+# 注意：dtb 文件名随内核来源/设备修订版而变，此处用的是友善 BSP 的 rev00（见上文说明）
 load ${devtype} ${devnum}:${distro_bootpart} ${fdt_addr_r} ${prefix}dtbs/rk3328-nanopi-r2-rev00.dtb
 fdt addr ${fdt_addr_r}
 fdt resize 65536
@@ -169,11 +171,15 @@ booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}
     mkimage -A arm64 -O linux -T ramdisk -C none -n "Initrd Image" -d /mnt/boot/initramfs-linux.img /mnt/boot/uInitrd;
     mkimage -A arm64 -O linux -T script -C none -n "Boot Script" -d boot.cmd /mnt/boot/boot.scr
 ```
-mkimage 做的事情很简单：给文件包上一个 U-Boot 能识别的头部，里面记录着类型、架构和校验和。这样 U-Boot 加载 uInitrd 和 boot.scr 的时候，才知道自己拿到的是什么东西、有没有损坏——这也回答了前面遗留的问题：为什么 Arch 提供的 initramfs 不能直接用，因为它缺的就是这个头。
+mkimage 做的事情很简单：给文件包上一个 U-Boot 能识别的头部，里面记录着类型、架构、大小和校验和。这样 U-Boot 加载 uInitrd 和 boot.scr 的时候，才知道自己拿到的是什么东西、多大、有没有损坏。
+
+这也回答了前面遗留的问题：Arch 提供的 initramfs 之所以“不能直接用”，并不是裸镜像天生不能加载，而是我的 boot.cmd 里 `booti` 行没带 `:size`（对比上面 Armbian 脚本的 `${ramdisk_addr_r}:${filesize}`）。两条 `booti` 写法的差别就在这里--要么在命令行给大小，要么让 mkimage 头把大小嵌进镜像，二选一。我选了后者，所以 boot.cmd 可以写 `booti ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}` 而不带 `:size`，代价是 initramfs 得先用 mkimage 包一层。
 到了这一步我们有了U-boot作为启动加载程序，就基本完成了，然后插电看看是不是已经搞定了。
 
 #### 避坑指南
 通过USB-TTL模块查看启动日志。我没有这个模块，只能看指示灯，出了问题也不知道出在哪个环节，浪费了很多时间。
+
+dtb 是整条流程里最容易卡的一步：NanoPi R2 有多个修订版，dtb 名字又随内核来源而变，Arch 预编译的基本不能用。这一步起不来又没串口的话几乎只能盲调，建议直接从 Armbian 镜像里抠一个能用的 dtb 先把启动链路跑通，再换 Arch 的 rootfs。
 
 现在想来最好从Armbian这个项目下载一个能用的系统, 测试Uboot和boot.scr或者extlinux.conf能不能工作，最后再刷入Arch的文件系统了。
 
