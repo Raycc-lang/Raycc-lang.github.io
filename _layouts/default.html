@@ -83,6 +83,9 @@
             <div style="color: #666; margin-bottom: 0.6em;">
               本文属于系列
               <a href="{{ series_url | relative_url }}">{{ page.series_title }}</a>
+              {% if series_page.repo %}
+                · 配套代码仓库: <a href="{{ series_page.repo }}">{{ series_page.repo | split: '/' | last }}</a>
+              {% endif %}
             </div>
             <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.8em;">
               <div>

@@ -4,5 +4,6 @@ _site
 _planning/
 .jekyll-cache
 .jekyll-metadata
+.vscode
 vendor
 Gemfile.lock
