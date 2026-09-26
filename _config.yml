@@ -78,6 +78,10 @@ defaults:
       ai_translated: true
       author_reviewed: false
 exclude:
+  - vendor
+  - node_modules
+  - Gemfile
+  - Gemfile.lock
   - docs
   - scripts
   - README.md
