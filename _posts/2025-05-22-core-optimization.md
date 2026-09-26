@@ -4,6 +4,7 @@ series_title: "零基础深度学习：The Little Learner代码实践"
 title:  "(一)核心优化机制"
 description: "《The Little Learner》系列第一篇，用Python实现线性模型与平方损失函数，讲解深度学习的核心优化机制"
 date:   2025-05-22 22:29:22 +0800
+last_modified_at: 2026-07-18 15:41:18 +0800
 categories: jekyll update
 rating: 2
 ---

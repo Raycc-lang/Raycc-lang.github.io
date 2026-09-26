@@ -3,6 +3,7 @@ layout: default
 title:  "计算机如何启动？如何部署Arch Linux Arm?"
 description: "对比PC与ARM架构的启动流程，详解如何在NanoPi R2S上部署Arch Linux ARM及安装过程中的常见坑点"
 date:   2025-02-04 14:29:22 +0800
+last_modified_at: 2026-07-18 15:41:18 +0800
 categories: jekyll update
 rating: 1
 translation_key: nanopi-r2s-arch-linux

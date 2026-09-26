@@ -4,6 +4,7 @@ translation_key: arch-linux-router
 title:  "什么是路由器？如何设置Archlinux作为软路由?"
 description: "使用systemd-networkd配置网络接口，并通过IPMasquerade与nftables实现Arch Linux软路由的NAT转发"
 date:   2025-02-25 00:13:22 +0800
+last_modified_at: 2026-07-18 15:41:18 +0800
 rating: 1
 categories: jekyll update
 redirect_from:

@@ -4,6 +4,7 @@ series_title: "零基础深度学习：The Little Learner代码实践"
 title:  "(四) 优化器"
 description: "《The Little Learner》系列第四篇，从随机梯度下降出发，逐步实现动量、RMSProp与Adam四种优化器"
 date:   2025-06-19 10:11:01 +0800
+last_modified_at: 2026-07-18 15:41:18 +0800
 categories: jekyll update
 rating: 2
 ---

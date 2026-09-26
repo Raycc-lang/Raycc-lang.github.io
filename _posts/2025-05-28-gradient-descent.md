@@ -4,6 +4,7 @@ series_title: "零基础深度学习：The Little Learner代码实践"
 title:  "(二)梯度下降"
 description: "《The Little Learner》系列第二篇，讲解梯度的数学意义与学习率的作用，并用Python从零实现梯度下降算法"
 date:   2025-05-25 22:29:22 +0800
+last_modified_at: 2026-07-13 18:48:05 +0800
 categories: jekyll update
 rating: 2
 ---

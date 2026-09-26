@@ -3,6 +3,7 @@ layout: default
 title:  "什么是尾递归优化? 如何把递归转化成迭代？"
 description: "讲解递归与尾递归优化的本质，并演示如何用显式栈把二叉树中序遍历等递归写法改写成迭代"
 date:   2025-04-23 17:30:42 +0800
+last_modified_at: 2026-07-18 15:41:18 +0800
 categories: jekyll update
 ---
 
