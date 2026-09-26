@@ -1,0 +1,6 @@
+{%- assign original = nil -%}
+{%- assign translation = nil -%}
+{%- if page.translation_key -%}
+  {%- assign original = site.posts | where: 'translation_key', page.translation_key | first -%}
+  {%- assign translation = site.translations | where: 'translation_key', page.translation_key | where_exp: 'item', 'item.published != false' | first -%}
+{%- endif -%}

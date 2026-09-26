@@ -19,9 +19,10 @@
 # in the templates via {{ site.myvariable }}.
 
 title: "Ray's Blog"
+repository: Raycc-lang/Raycc-lang.github.io
 github:
   owner_name: "Ray"
-  repository_url: "raycc.org"
+  repository_url: "https://github.com/Raycc-lang/Raycc-lang.github.io"
 email: ray@raycc.org
 description: "计算机学习与实践笔记：Linux、网络与深度学习，从原理出发。Ray's notes on computing — Linux, networking, and deep learning, from first principles."
 
@@ -56,3 +57,30 @@ plugins:
 #   - vendor/cache/
 #   - vendor/gems/
 #   - vendor/ruby/
+
+# Chinese originals retain their existing URLs and feed.
+lang: zh-CN
+collections:
+  translations:
+    output: true
+    permalink: /en/:name/
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      lang: zh-CN
+  - scope:
+      path: ""
+      type: translations
+    values:
+      layout: default
+      lang: en
+exclude:
+  - vendor
+  - node_modules
+  - Gemfile
+  - Gemfile.lock
+  - docs
+  - scripts
+  - README.md

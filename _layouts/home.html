@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="{{ site.lang | default: 'en' }}">
+<html lang="{{ page.lang | default: site.lang | default: 'zh-CN' }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 {% seo %}
+  {% include language-alternates.html %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&display=swap" rel="stylesheet">
@@ -255,9 +256,6 @@
     text-decoration: underline;
   }
 
-  /* Lang content visibility */
-  .lang { display: none; }
-  .lang.active { display: block; }
 
   /* Footer */
   footer {
@@ -286,23 +284,36 @@
 </head>
 <body>
 {% assign featured_post = site.posts | where_exp: "p", "p.path contains 'htdp1'" | first %}
+{% assign featured_translation = site.translations | where: 'translation_key', 'arch-linux-router' | where_exp: 'item', 'item.published != false' | first %}
 
 <header>
   <div class="inner">
     <div class="topbar">
-      <nav class="topnav" aria-label="Primary">
-        <a href="{{ '/posts' | relative_url }}">Latest Posts</a>
-        <a href="{{ '/series' | relative_url }}">Article Series</a>
-        <a href="/about/">About Me</a>
-        <a href="#contact">Connect</a>
+      <nav class="topnav" aria-label="{% if page.lang == 'en' %}Primary{% else %}主导航{% endif %}">
+        {% if page.lang == 'en' %}
+        <a href="{{ '/en/posts/' | relative_url }}">English articles</a>
+        <a href="{{ '/series/' | relative_url }}" hreflang="zh-CN">Series (中文)</a>
+        <a href="{{ '/about/' | relative_url }}">About Me</a>
+        <a href="#contact-en">Connect</a>
+        {% else %}
+        <a href="{{ '/posts' | relative_url }}">全部文章</a>
+        <a href="{{ '/series/' | relative_url }}">系列合集</a>
+        <a href="{{ '/about/' | relative_url }}">关于我</a>
+        <a href="#contact-zh">联系我</a>
+        {% endif %}
       </nav>
-      <button class="lang-toggle" id="langToggle" aria-label="Toggle language">EN / 中文</button>
+      <nav aria-label="Language">
+        {% if page.lang == 'en' %}
+        <a class="lang-toggle" href="{{ '/' | relative_url }}" lang="zh-CN" hreflang="zh-CN">中文</a>
+        {% else %}
+        <a class="lang-toggle" href="{{ '/en/' | relative_url }}" lang="en" hreflang="en">English</a>
+        {% endif %}
+      </nav>
     </div>
 
-    <a class="brand" href="/">
+    <a class="brand" href="{{ page.url | relative_url }}">
       <h1>Ray's Blog</h1>
-      <h2 data-en="Notes on computing, from first principles."
-          data-zh="计算机相关领域的学习与实践笔记，关注原理。">Notes on computing, from first principles.</h2>
+      <h2>{% if page.lang == 'en' %}Notes on computing, from first principles.{% else %}计算机相关领域的学习与实践笔记，关注原理。{% endif %}</h2>
     </a>
   </div>
 </header>
@@ -310,6 +321,7 @@
 <main>
   <div class="inner">
 
+    {% if page.lang == 'en' %}
     <!-- ENGLISH -->
     <section class="lang" id="lang-en" lang="en">
       <h1 class="section-title">Welcome</h1>
@@ -322,27 +334,30 @@
         framework for consolidation and reinforcement.
       </p>
 
+      <p class="lede">Selected articles are available in English through AI-assisted translation. Each translation links to its Chinese original and states its author-review status.</p>
       <h2 class="section-title">Featured</h2>
       <div class="features">
+        {% if featured_translation %}
         <article class="feature">
           <div class="tag">/ ARTICLE</div>
-          <h3><a href="{{ featured_post.url | relative_url }}">What Is a Computer Program? How to Write One?</a></h3>
-          <p>If you've ever wondered what exactly you're "programming," this article reveals the thought process from real-world problems to code.</p>
-          <a class="read" href="{{ featured_post.url | relative_url }}">Read article</a>
+          <h3><a href="{{ featured_translation.url | relative_url }}">{{ featured_translation.title | escape }}</a></h3>
+          <p>How network interfaces, packet forwarding, and address translation fit together in a Linux router.</p>
+          <a class="read" href="{{ featured_translation.url | relative_url }}">Read article</a>
         </article>
+        {% endif %}
 
         <article class="feature">
           <div class="tag">// SERIES</div>
-          <h3><a href="{{ '/series/the-tiny-learner/' | relative_url }}">The Tiny Learner: Deep Learning from Scratch</a></h3>
+          <h3><a href="{{ '/series/the-tiny-learner/' | relative_url }}">The Tiny Learner: Deep Learning from Scratch (中文)</a></h3>
           <p>AI is everywhere, yet its underlying technology is rarely discussed or often deemed too esoteric. This series offers a path to understanding that doesn't require deep mathematical background.</p>
-          <a class="read" href="{{ '/series/the-tiny-learner/' | relative_url }}">Browse series</a>
+          <a class="read" href="{{ '/series/the-tiny-learner/' | relative_url }}">Browse Chinese series</a>
         </article>
 
         <article class="feature">
           <div class="tag">/// ARCHIVE</div>
-          <h3><a href="{{ '/posts' | relative_url }}">All Posts</a></h3>
-          <p>You can find all articles here, covering various topics from Linux and networking fundamentals to specific hands-on projects.</p>
-          <a class="read" href="{{ '/posts' | relative_url }}">View archive</a>
+          <h3><a href="{{ '/en/posts/' | relative_url }}">English Articles</a></h3>
+          <p>Browse the English editions currently available. More articles will be added as they are translated.</p>
+          <a class="read" href="{{ '/en/posts/' | relative_url }}">View English archive</a>
         </article>
       </div>
 
@@ -350,7 +365,7 @@
         <div class="about-section">
           <h2 class="section-title">About</h2>
           <p>To learn more about me, please check the <a href="{{ '/about' | relative_url }}">About Me</a> page.
-             For any ideas or questions, feel free to <a href="#contact">contact me</a>.</p>
+             For any ideas or questions, feel free to <a href="#contact-en">contact me</a>.</p>
         </div>
       </div>
 
@@ -373,6 +388,7 @@
       </aside>
     </section>
 
+    {% else %}
     <!-- 中文 -->
     <section class="lang" id="lang-zh" lang="zh">
       <h1 class="section-title">欢迎</h1>
@@ -410,7 +426,7 @@
         <div class="about-section">
           <h2 class="section-title">关于</h2>
           <p>想了解更多关于我的信息，请查看<a href="{{ '/about' | relative_url }}">关于我</a>。
-             如有任何想法或问题，欢迎<a href="#contact">与我联系</a>。</p>
+             如有任何想法或问题，欢迎<a href="#contact-zh">与我联系</a>。</p>
         </div>
       </div>
 
@@ -433,57 +449,19 @@
       </aside>
     </section>
 
+    {% endif %}
   </div>
 </main>
 
 <footer>
   <div class="inner">
     <div>© <span id="year"></span> Ray's Blog · Built with Jekyll &amp; the Architect theme</div>
-    <div><a href="/feed.xml">RSS</a> · <a href="https://github.com/raycc-lang">GitHub</a></div>
+    <div><a href="{{ '/feed.xml' | relative_url }}">{% if page.lang == 'en' %}RSS (Chinese originals){% else %}RSS{% endif %}</a> · <a href="https://github.com/raycc-lang">GitHub</a></div>
   </div>
 </footer>
 
 <script>
-  (function () {
-    var btn = document.getElementById('langToggle');
-    var en = document.getElementById('lang-en');
-    var zh = document.getElementById('lang-zh');
-    var tagline = document.querySelector('header h2');
-
-    function setLang(lang) {
-      var isZh = lang === 'zh';
-      en.classList.toggle('active', !isZh);
-      zh.classList.toggle('active', isZh);
-      btn.textContent = isZh ? '中文 / EN' : 'EN / 中文';
-      if (tagline) tagline.textContent = tagline.getAttribute(isZh ? 'data-zh' : 'data-en');
-      document.documentElement.lang = isZh ? 'zh' : 'en';
-      try { localStorage.setItem('lang', lang); } catch (e) {}
-    }
-
-    var saved = null;
-    try { saved = localStorage.getItem('lang'); } catch (e) {}
-    if (!saved) {
-      saved = (navigator.language || '').toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
-    }
-    setLang(saved);
-
-    btn.addEventListener('click', function () {
-      setLang(en.classList.contains('active') ? 'zh' : 'en');
-    });
-
-    // Smooth-scroll #contact links to the contact block of the active language
-    document.querySelectorAll('a[href="#contact"]').forEach(function (a) {
-      a.addEventListener('click', function (e) {
-        e.preventDefault();
-        var target = document.querySelector(
-          (zh.classList.contains('active') ? '#contact-zh' : '#contact-en')
-        );
-        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-    });
-
-    document.getElementById('year').textContent = new Date().getFullYear();
-  })();
+  document.getElementById('year').textContent = new Date().getFullYear();
 </script>
 
 </body>

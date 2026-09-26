@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="{{ site.lang | default: " en-US" }}">
+<html lang="{{ page.lang | default: site.lang | default: 'zh-CN' }}">
 
 <head>
   <meta charset='utf-8'>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   {% seo %}
+  {% include language-alternates.html %}
   <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}"
     media="screen" type="text/css">
   <link rel="stylesheet" href="{{ '/assets/css/print.css' | relative_url }}" media="print" type="text/css">
@@ -31,10 +32,11 @@
 <body>
   <header>
     <div class="inner">
-      <a href="{{ '/' | absolute_url }}">
+      {% include site-navigation.html %}
+      <a href="{% if page.lang == 'en' %}{{ '/en/' | relative_url }}{% else %}{{ '/' | relative_url }}{% endif %}">
         <h1>{{ site.title | default: site.github.repository_name }}</h1>
       </a>
-      <h2>{{ site.description | default: site.github.project_tagline }}</h2>
+      <h2>{% if page.lang == 'en' %}Notes on computing, from first principles.{% else %}{{ site.description | default: site.github.project_tagline }}{% endif %}</h2>
 
     </div>
   </header>
@@ -43,13 +45,15 @@
     <div class="inner clearfix">
       <section id="main-content">
 
-        {% if page.series %}
+        {% if page.series or page.translation_key %}
           <h1>{{ page.title }}</h1>
         {% else %}
           {% if page.title %}
             <h3>{{ page.title }}</h3>
           {% endif %}
         {% endif %}
+
+        {% include edition-navigation.html %}
 
         {{ content }}
 
@@ -103,11 +107,8 @@
         {% endif %}
       </section>
 
-      <aside id="sidebar">
-
+      <aside id="sidebar"></aside>
     </div>
-    </aside>
-  </div>
   </div>
 
 </body>

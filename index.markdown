@@ -3,4 +3,7 @@
 # To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 
 layout: home
+lang: zh-CN
+counterpart_url: /en/
+counterpart_lang: en
 ---
