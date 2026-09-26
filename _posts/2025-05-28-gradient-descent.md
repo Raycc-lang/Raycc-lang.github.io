@@ -6,6 +6,7 @@ description: "《The Little Learner》系列第二篇，讲解梯度的数学意
 date:   2025-05-25 22:29:22 +0800
 categories: jekyll update
 rating: 2
+translation_key: gradient-descent
 ---
 
 

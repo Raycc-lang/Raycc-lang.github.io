@@ -6,6 +6,7 @@ description: "《The Little Learner》系列第一篇，用Python实现线性模
 date:   2025-05-22 22:29:22 +0800
 categories: jekyll update
 rating: 2
+translation_key: core-optimization
 ---
 
 #### The Little Learner
