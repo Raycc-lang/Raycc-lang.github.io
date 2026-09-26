@@ -8,7 +8,7 @@ translated_at: 2026-09-26
 
 #### Introduction
 
-In my [previous article (Chinese)]({% post_url 2025-02-05-nanopi-r2s-arch-linux %}), I described installing Arch Linux ARM on a NanoPi R2S. Now it is time to put it to work.
+In my [previous article]({{ '/en/nanopi-r2s-arch-linux/' | relative_url }}), I described installing Arch Linux ARM on a NanoPi R2S. Now it is time to put it to work.
 
 The R2S is well suited to being a home software router. My goal is to configure Arch Linux for that role and, more importantly, use the process to understand networking better.
 

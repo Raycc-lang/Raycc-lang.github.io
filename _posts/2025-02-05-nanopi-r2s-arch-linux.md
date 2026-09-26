@@ -5,6 +5,7 @@ description: "对比PC与ARM架构的启动流程，详解如何在NanoPi R2S上
 date:   2025-02-04 14:29:22 +0800
 categories: jekyll update
 rating: 1
+translation_key: nanopi-r2s-arch-linux
 ---
 
 #### 想装Arch Linux
