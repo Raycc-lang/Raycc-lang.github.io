@@ -6,6 +6,7 @@ description: "《The Little Learner》系列第六篇：用前五篇亲手构建
 date:   2026-07-13 12:00:00 +0800
 categories: jekyll update
 rating: 2
+translation_key: neural-networks
 ---
 
 #### 兑现承诺的时刻

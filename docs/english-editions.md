@@ -10,6 +10,12 @@ The `blog` branch contains the published Jekyll source. The `main` branch only c
 - Homepage language selection is a normal link. The URL determines the language; browser language and local storage do not override shared links. Reading and language navigation work without JavaScript.
 - Both article editions share a `translation_key`. The layouts resolve the corresponding article, render reciprocal language links, and add `hreflang` metadata. Each page retains its own canonical URL; the Chinese article remains the editorial source of truth.
 
+## Coverage
+
+All 12 published articles have English editions. The withdrawn data-structures entry remains in the Chinese archive with its existing withdrawal notice. The complete seven-article deep-learning series is indexed at `/en/series/the-tiny-learner/`.
+
+The final batch and its technical clarifications are documented in [final-translations-review.md](final-translations-review.md).
+
 ## Add a translation
 
 1. Add a unique, stable `translation_key` to the original's front matter, such as `tproxy`. Do not change its filename, date, categories, or permalink.

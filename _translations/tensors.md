@@ -560,11 +560,8 @@ Next, we return to gradient descent and explore its optimizer variants.
 
 ---
 
-{% assign previous_edition = site.translations | where: 'translation_key', 'gradient-descent' | where_exp: 'item', 'item.published != false' | first %}
-{% if previous_edition %}
-Previous: [Part 2: Gradient Descent]({{ previous_edition.url | relative_url }}).
-{% else %}
-Previous: [Part 2: Gradient Descent (Chinese)]({% post_url 2025-05-28-gradient-descent %}).
-{% endif %}
+Previous: [Part 2: Gradient Descent]({{ '/en/gradient-descent/' | relative_url }}).
 
 Next: [Part 4: Optimizers]({{ '/en/optimizers/' | relative_url }}).
+
+Series: [The Little Learner in Python]({{ '/en/series/the-tiny-learner/' | relative_url }}).
