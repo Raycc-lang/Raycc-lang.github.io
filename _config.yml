@@ -56,3 +56,28 @@ plugins:
 #   - vendor/cache/
 #   - vendor/gems/
 #   - vendor/ruby/
+
+# Chinese originals retain their existing URLs and feed.
+lang: zh-CN
+collections:
+  translations:
+    output: true
+    permalink: /en/:name/
+defaults:
+  - scope:
+      path: ""
+      type: posts
+    values:
+      lang: zh-CN
+  - scope:
+      path: ""
+      type: translations
+    values:
+      layout: default
+      lang: en
+      ai_translated: true
+      author_reviewed: false
+exclude:
+  - docs
+  - scripts
+  - README.md

@@ -1,0 +1,23 @@
+{% include edition-pair.html %}
+{% if original and translation %}
+<nav class="edition-switch" aria-label="Article language">
+  {% if page.lang == 'en' %}
+    <a href="{{ original.url | relative_url }}" lang="zh-CN" hreflang="zh-CN">中文原文</a>
+    <span aria-hidden="true"> / </span><span lang="en" aria-current="page">English</span>
+  {% else %}
+    <span lang="zh-CN" aria-current="page">中文原文</span><span aria-hidden="true"> / </span>
+    <a href="{{ translation.url | relative_url }}" lang="en" hreflang="en">English</a>
+  {% endif %}
+</nav>
+{% endif %}
+{% if page.ai_translated %}
+<aside class="translation-notice" aria-label="Translation disclosure">
+  <p><strong>AI-assisted translation.</strong> This article was originally written in Chinese by Ray. The English text was translated using AI.
+  {% if page.author_reviewed == true %}
+    The author has reviewed this translation for technical accuracy.
+  {% else %}
+    This translation has not yet been reviewed by the author.
+  {% endif %}
+  {% if original %}<a href="{{ original.url | relative_url }}" hreflang="zh-CN">Read the Chinese original.</a>{% endif %}</p>
+</aside>
+{% endif %}

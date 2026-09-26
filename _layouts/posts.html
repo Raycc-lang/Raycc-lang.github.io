@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="{{ site.lang | default: 'en-US' }}">
+<html lang="{{ page.lang | default: site.lang | default: 'zh-CN' }}">
 
 <head>
   <meta charset='utf-8'>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   {% seo %}
+  {% include language-alternates.html %}
   <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}"
     media="screen" type="text/css">
   <link rel="stylesheet" href="{{ '/assets/css/print.css' | relative_url }}" media="print" type="text/css">
@@ -88,9 +89,7 @@
       gap: 0.5rem;
     }
 
-    .inner {
-     margin-left: 20%; 
-    }
+
     
     .post-rating-stars span {
       font-size: 0.9rem;
@@ -103,23 +102,33 @@
 <body>
   <header>
     <div class="inner">
-      <a href="{{ '/' | absolute_url }}">
+      {% include site-navigation.html %}
+      <a href="{% if page.lang == 'en' %}{{ '/en/' | relative_url }}{% else %}{{ '/' | relative_url }}{% endif %}">
         <h1>{{ site.title | default: site.github.repository_name }}</h1>
       </a>
-      <h2>{{ site.description | default: site.github.project_tagline }}</h2>
+      <h2>{% if page.lang == 'en' %}Notes on computing, from first principles.{% else %}{{ site.description | default: site.github.project_tagline }}{% endif %}</h2>
     </div>
   </header>
   <div id="content-wrapper">
     <div class="inner clearfix" id="list">
       <section id="main-content">
         {{ content }}
-        <h1>Latest Posts</h1>
+        <h1>{% if page.lang == 'en' %}English articles{% else %}全部文章{% endif %}</h1>
+        <nav class="edition-switch" aria-label="Archive language">
+          <a href="{{ '/posts' | relative_url }}" lang="zh-CN" hreflang="zh-CN"{% if page.lang != 'en' %} aria-current="page"{% endif %}>中文</a> /
+          <a href="{{ '/en/posts/' | relative_url }}" lang="en" hreflang="en"{% if page.lang == 'en' %} aria-current="page"{% endif %}>English</a>
+        </nav>
+        {% if page.lang == 'en' %}
+          {% assign listed_posts = site.translations | where_exp: 'item', 'item.published != false' | sort: 'date' | reverse %}
+        {% else %}
+          {% assign listed_posts = site.posts %}
+        {% endif %}
         <ul class="post-list" style="list-style: none; padding-left: 0;">
           {% comment %}
           Display all posts in chronological order (newest first)
           Each post is listed individually, whether it's part of a series or standalone
           {% endcomment %}
-          {% for post in site.posts %}
+          {% for post in listed_posts %}
             <li>
               <div class="post-title-line">
                 
@@ -129,6 +138,10 @@
                       {{ post.title | escape }}
                     </a>
                   </h3>
+                  {% if page.lang != 'en' and post.translation_key %}
+                    {% assign english_edition = site.translations | where: 'translation_key', post.translation_key | where_exp: 'item', 'item.published != false' | first %}
+                    {% if english_edition %}<a href="{{ english_edition.url | relative_url }}" lang="en" hreflang="en">Read in English</a>{% endif %}
+                  {% endif %}
                   {% if post.series_title %}
                     <div class="series-info">
                       系列📚: <a href="{{ '/series' | relative_url }}#{{ post.series_title | slugify }}">{{ post.series_title }}</a>
@@ -140,7 +153,7 @@
               
               <div class="post-meta-line">
                 <span class="post-meta">{{ post.date | date: '%b %-d, %Y' }}</span>
-                <div class="post-rating">
+                {% if page.lang != 'en' %}<div class="post-rating">
                   <span class="post-rating-label">推荐阅读:</span>
                   <span class="post-rating-stars">
                     {% assign rating = post.rating | default: 2 %}
@@ -152,7 +165,7 @@
                       {% endif %}
                     {% endfor %}
                   </span>
-                </div>
+                </div>{% endif %}
               </div>
             </li>
           {% endfor %}

@@ -485,3 +485,18 @@ footer a:hover {
 
 /* Mobile Portrait Size to Mobile Landscape Size (devices and browsers) */
 @media only screen and (max-width: 479px) { }
+
+/* Language editions: normal links work with JavaScript disabled. */
+.site-navigation { display: flex; flex-wrap: wrap; gap: .6em 1.2em; margin-bottom: 1.5em; }
+header .site-navigation a { color: #fff; text-decoration: underline; }
+.edition-switch { margin: 1em 0 1.5em; font-size: 1rem; }
+.edition-switch a { text-decoration: underline; }
+.translation-notice { border-left: 4px solid #2879d0; background: #edf5fc; padding: 1em 1.2em; margin: 1em 0 2em; color: #35485b; }
+.translation-notice p { margin: 0; }
+/* Keep long English titles and reference URLs inside small viewports. */
+#main-content { overflow-wrap: break-word; }
+#main-content a { overflow-wrap: anywhere; }
+@media (max-width: 767px) {
+  header h1 { margin-left: 0; }
+  #main-content h1 { font-size: 2em; line-height: 1.25; text-indent: 0; }
+}
