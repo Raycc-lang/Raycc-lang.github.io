@@ -70,9 +70,9 @@ This first helper only perturbs the first parameter, and it modifies the supplie
 def nabla(objective_func: Callable[[List[float]], float],
           theta: List[float],
           delta: float = 1e-6) -> List[float]:
-    
+
     current_loss = objective_func(theta)
-    
+
     def get_grad(theta_copy: List[float], i: int) -> float:
 
         theta_copy[i] += delta
@@ -136,7 +136,7 @@ In code:
 learning_rate = 0.01
 
 def update_v1(theta: List[float]) -> List[float]:
-  
+
     # Calculate the gradient.
     gradient = nabla(line_objective, theta)
     # Update each parameter p using its gradient g and the learning rate.
@@ -166,9 +166,9 @@ def gradient_descent(objective_func: Callable[[List[float]], float],
 
     # The same update rule as update_v1.
     def update(theta: List[float]) -> List[float]:
-        
+
         grad = nabla(objective_func, theta)
-        
+
         revised_theta = [p - learning_rate * g for p, g in zip(theta, grad)]
         return revised_theta
 

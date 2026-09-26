@@ -114,7 +114,7 @@ def factorial(n):
             return acc
         else:
             return inner_fact_iter(n - 1, n * acc)
-    
+
     return inner_fact_iter(n, 1)
 ```
 
@@ -176,20 +176,20 @@ def flatten_iterative(bst):
     result = []
     stack = []
     current = bst
-    
+
     while current or stack:
         # Descend into the left subtree.
         while current:
             stack.append(current)
             current = current.left
-        
+
         # Return to the most recently saved node.
         current = stack.pop()
         result.append(current.val)
-        
+
         # Move to the right subtree.
         current = current.right
-    
+
     return result
 
 # Do not forget to test.

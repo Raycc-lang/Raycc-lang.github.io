@@ -45,7 +45,7 @@ from typing import Callable, Iterable, List
 # The values are real numbers; use float to represent them.
 
 def line(x: float) -> Callable[[float, float], float]:
-    
+
     return lambda w, b: w * x + b
 ```
 
@@ -88,7 +88,7 @@ We can write a function to calculate the signed error for one input under a give
 
 ```python
 def loss_single(x: float, y: float, theta: list[float]) -> float:
-    
+
     pred_y = line(x)(*theta)
     return y - pred_y
 ```
@@ -102,13 +102,13 @@ First, it processes one value at a time. We want it to handle the whole dataset,
 ```python
 # Let line process a collection of inputs rather than a single value.
 def line(xs: Iterable[float]) -> Callable[[float, float], List[float]]:
-    
+
     return lambda w, b: [w * x + b for x in xs]
 
 # A helper for elementwise vector subtraction:
 # [a, b] - [c, d] = [a - c, b - d], and so on.
 def sub(ms: Iterable[float], ns: Iterable[float]) -> List[float]:
-    
+
     return [m - n for m, n in zip(ms, ns)]
 
 def loss(xs: Iterable[float], ys: Iterable[float], theta: list[float]):
@@ -131,7 +131,7 @@ def sqr(xs: Iterable[float]) -> List[float]:
     return [x ** 2 for x in xs]
 
 def l2_loss(xs: Iterable[float], ys: Iterable[float], theta: List[float]) -> float:
-    
+
     pred_ys = line(xs)(*theta)
     errors = sub(ys, pred_ys)
     sqr_err = sqr(errors)
@@ -147,11 +147,11 @@ Higher-order functions solve both problems. We supply the model and dataset firs
 
 ```python
 def l2_loss(target: Callable[[Iterable[float]], Callable[[float, float], List[float]]]) -> Callable:
-    
+
     def expectant(xs: Iterable[float], ys: Iterable[float]) -> Callable:
-        
+
         def objective(theta: list[float]) -> float:
-            
+
             pred_ys = target(xs)(*theta)
             errors = sub(ys, pred_ys)
             return sum(sqr(errors))
