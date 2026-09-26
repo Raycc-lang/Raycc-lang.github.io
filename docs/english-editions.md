@@ -13,17 +13,16 @@ The `blog` branch contains the published Jekyll source. The `main` branch only c
 ## Add a translation
 
 1. Add a unique, stable `translation_key` to the original's front matter, such as `tproxy`. Do not change its filename, date, categories, or permalink.
-2. Create `_translations/<slug>.md` with English `title` and `description`, the same `translation_key`, the original `date`, and a `translated_at` date. The collection supplies `layout: default`, `lang: en`, `ai_translated: true`, and `author_reviewed: false`.
+2. Create `_translations/<slug>.md` with English `title` and `description`, the same `translation_key`, the original `date`, and a `translated_at` date. The collection supplies `layout: default` and `lang: en`.
 3. Translate the full article. Keep commands, paths, options, addresses, and mathematical notation accurate. Translate explanatory comments. Use `{% post_url original-filename-without-extension %}` for untranslated source articles and label those links as Chinese. Link to the English edition where one exists.
 4. Check the translation against the original, including code blocks and the meaning of technical claims. Record any technical corrections separately for the author to review; do not silently revise the Chinese source.
-5. After Ray personally reviews the translation, set `author_reviewed: true` in that translation's front matter. Only this explicit boolean enables the author-reviewed disclosure. AI review alone does not qualify.
-6. Run `bundle exec jekyll build` and `bundle exec ruby scripts/check_editions.rb` before merging.
+5. Run `bundle exec jekyll build` and `bundle exec ruby scripts/check_editions.rb` before merging.
 
 The English archive discovers new translations automatically. To keep an unfinished translation out of the generated site, set `published: false`; it will also be excluded from the archive and language switches. Keep `translation_key` unique within each collection, with exactly one original and one English edition per key. Do not copy `redirect_from` or the Chinese permalink into a translation.
 
 ## Initial translation review notes
 
-The initial editions cover Linux TProxy and configuring Arch Linux as a router. Both are marked **not yet reviewed by the author**. Their article dates retain the originals' dates.
+The initial editions cover Linux TProxy and configuring Arch Linux as a router. Their article dates retain the originals' dates.
 
 These are translations with a few explicit technical clarifications, not a new lab validation of the original configurations:
 
@@ -33,7 +32,7 @@ These are translations with a few explicit technical clarifications, not a new l
 - **Router:** use the concrete IPv4 masquerading option for the IPv4 discussion. Keep the original network configuration blocks, but explain that working IPv6 also depends on upstream prefix delegation. Retain the original nftables example; it is not presented as a complete firewall policy.
 - **Router:** replace the typographic SNAT placeholder with an explicitly non-executable address placeholder. Explain reply translation through connection tracking. Qualify the suggestion that a transparent proxy can replace masquerading: that depends on the traffic and protocols the proxy supports.
 
-Review these differences before marking the translations author-reviewed, and decide whether to make corresponding corrections to the Chinese originals separately.
+Review these differences and decide whether to make corresponding corrections to the Chinese originals separately.
 
 Technical references checked while preparing these clarifications:
 
@@ -43,4 +42,4 @@ Technical references checked while preparing these clarifications:
 
 ## Implementation checks
 
-The regression check runs against generated HTML: original article URLs, separate archives, reciprocal edition links, language metadata, self-canonical URLs, and honest disclosure. It also checks internal links on the English pages. GitHub Actions runs the same build and check for pull requests against `blog`; it does not deploy the site.
+The regression check runs against generated HTML: original article URLs, separate archives, reciprocal edition links, language metadata, self-canonical URLs, and internal links on the English pages. GitHub Actions runs the same build and check for pull requests against `blog`; it does not deploy the site.

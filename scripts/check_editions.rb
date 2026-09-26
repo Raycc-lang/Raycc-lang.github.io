@@ -40,10 +40,7 @@ translations.each do |path, data|
   url = "/en/#{File.basename(path, '.md')}/"
   english = html(url)
   check(english.at('html')['lang'] == 'en', "Incorrect lang: #{url}")
-  notice = english.at('.translation-notice')&.text.to_s
-  check(notice.include?('translated using AI'), "Missing AI disclosure: #{url}")
-  expected = data['author_reviewed'] == true ? 'author has reviewed' : 'not yet been reviewed by the author'
-  check(notice.include?(expected), "Incorrect author-review status: #{url}")
+  check(english.at('.translation-notice').nil?, "Disclosure must not appear on translations: #{url}")
   check(URI.parse(english.at('link[rel="canonical"]')['href']).path == url, "Canonical changed: #{url}")
 
   original_url = english.at('link[hreflang="zh-CN"]')&.[]('href')
@@ -85,4 +82,4 @@ Dir['_site/en/**/*.html'].each do |file|
   end
 end
 
-puts "English editions checked: #{english_archive.size} translations, #{archive.size} original posts; links, metadata, and disclosures pass."
+puts "English editions checked: #{english_archive.size} translations, #{archive.size} original posts; links and metadata pass."
