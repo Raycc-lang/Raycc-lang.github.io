@@ -5,6 +5,7 @@ description: "讲解递归与尾递归优化的本质，并演示如何用显式
 date:   2025-04-23 17:30:42 +0800
 last_modified_at: 2026-07-18 15:41:18 +0800
 categories: jekyll update
+translation_key: tail-recursion
 ---
 
 

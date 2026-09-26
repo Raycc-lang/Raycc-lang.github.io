@@ -7,6 +7,7 @@ date:   2025-05-25 22:29:22 +0800
 last_modified_at: 2026-07-13 18:48:05 +0800
 categories: jekyll update
 rating: 2
+translation_key: gradient-descent
 ---
 
 

@@ -7,6 +7,7 @@ date:   2025-05-22 22:29:22 +0800
 last_modified_at: 2026-07-18 15:41:18 +0800
 categories: jekyll update
 rating: 2
+translation_key: core-optimization
 ---
 
 #### The Little Learner
