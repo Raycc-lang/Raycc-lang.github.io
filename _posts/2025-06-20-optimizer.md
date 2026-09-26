@@ -6,6 +6,7 @@ description: "《The Little Learner》系列第四篇，从随机梯度下降出
 date:   2025-06-19 10:11:01 +0800
 categories: jekyll update
 rating: 2
+translation_key: optimizers
 ---
 
 #### 引言：优化器的重要性  
