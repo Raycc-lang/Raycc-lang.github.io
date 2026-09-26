@@ -7,6 +7,7 @@ date:   2025-06-19 10:11:01 +0800
 last_modified_at: 2026-07-18 15:41:18 +0800
 categories: jekyll update
 rating: 2
+translation_key: optimizers
 ---
 
 #### 引言：优化器的重要性  
