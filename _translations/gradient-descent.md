@@ -287,4 +287,6 @@ For now, take a break.
 
 Previous: [Part 1: The Core Optimization Mechanism]({{ '/en/core-optimization/' | relative_url }}).
 
-Next: [Part 3: Tensors (Chinese)]({% post_url 2025-06-07-tensor %}).
+Next: [Part 3: Tensors]({{ '/en/tensors/' | relative_url }}).
+
+Series: [The Little Learner in Python]({{ '/en/series/the-tiny-learner/' | relative_url }}).

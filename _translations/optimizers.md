@@ -402,4 +402,6 @@ If you would rather build the mechanism yourself, the next article introduces au
 
 Previous: [Part 3: Tensors]({{ '/en/tensors/' | relative_url }}).
 
-Next: [Part 5: Automatic Differentiation (Chinese)]({% post_url 2025-07-27-autodiff %}).
+Next: [Part 5: Automatic Differentiation]({{ '/en/automatic-differentiation/' | relative_url }}).
+
+Series: [The Little Learner in Python]({{ '/en/series/the-tiny-learner/' | relative_url }}).

@@ -1,9 +1,12 @@
 ---
 layout: series_home
+lang: zh-CN
 title: "零基础深度学习"
 series_title: "零基础深度学习：The Little Learner代码实践"
 permalink: /series/the-tiny-learner/
 subtitle: ""
+counterpart_url: /en/series/the-tiny-learner/
+counterpart_lang: en
 repo: https://github.com/Raycc-lang/tiny-learner
 ---
 

@@ -229,3 +229,5 @@ What we still lack is an effective update rule. Next, we will implement one of t
 ---
 
 Next: [Part 2: Gradient Descent]({{ '/en/gradient-descent/' | relative_url }}).
+
+Series: [The Little Learner in Python]({{ '/en/series/the-tiny-learner/' | relative_url }}).
